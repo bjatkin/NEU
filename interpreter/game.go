@@ -32,7 +32,7 @@ func NewGame() *Game {
 }
 
 func (g *Game) Update() error {
-	return nil
+	return g.Interpreter.Run()
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {

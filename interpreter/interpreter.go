@@ -19,16 +19,26 @@ type Interp struct {
 }
 
 func (i *Interp) Run() error {
+	// TODO: this should probably be done in a for/while loop
+	// TODO: should I have a done code or just when execution
+	// gets to the end of the code?
+	if i.ExePointer >= len(i.Memory) {
+		// execution is finished
+		return nil
+	}
 	op := i.Memory[i.ExePointer]
 	deltaEPtr, deltaSPtr := core.OpCodes[op].Fn(i.Memory[:], i.ExePointer, i.StackPointer)
 	i.ExePointer += deltaEPtr
 	i.StackPointer += deltaSPtr
-	if i.ExePointer < i.ReadOnlyOffset {
-		return errors.New(fmt.Sprintf("invalid execution pointer %d, read only region starts at %d", i.ExePointer, i.ReadOnlyOffset))
-	}
-	if i.StackPointer > i.ReadOnlyOffset {
-		return errors.New(fmt.Sprintf("invalid stack pointer %d, read only region starts at %d", i.StackPointer, i.ReadOnlyOffset))
-	}
+	// if i.ExePointer < i.ReadOnlyOffset {
+	// 	return errors.New(fmt.Sprintf("invalid execution pointer %d, read only region starts at %d", i.ExePointer, i.ReadOnlyOffset))
+	// }
+	// if i.StackPointer > i.ReadOnlyOffset {
+	// 	return errors.New(fmt.Sprintf("invalid stack pointer %d, read only region starts at %d", i.StackPointer, i.ReadOnlyOffset))
+	// }
+	fmt.Println("OP: ", core.OpCodes[op].Pat)
+	fmt.Println("EXEPT: ", i.ExePointer, "STACKPT: ", i.StackPointer)
+	fmt.Printf("MEM: ...%#v\n", i.Memory[8185:])
 	return nil
 }
 

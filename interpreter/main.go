@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -8,9 +9,13 @@ import (
 
 func main() {
 	game := NewGame()
-	err := game.Interpreter.LoadCode(
-		[]byte{0x10, 0x2, 0x10, 0xf, 0x0},
-	)
+
+	code, err := ioutil.ReadFile("example.n")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = game.Interpreter.LoadCode(code)
 	if err != nil {
 		log.Fatalln(err)
 	}

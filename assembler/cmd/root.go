@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strconv"
 	"strings"
 
@@ -11,14 +12,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	outputFile string
+	print      bool
+)
+
+func init() {
+	rootCmd.PersistentFlags().StringVar(&outputFile, "output", "", "the output file to write the compiled phone to")
+	rootCmd.PersistentFlags().BoolVar(&print, "print", false, "print the binary data to the console")
+}
+
 var rootCmd = &cobra.Command{
-	Use:   "NeuBi",
+	Use:   "NeuBi [byte code file]",
 	Short: "NeuBi is an assembler that assembles neu byte code",
 	Args:  cobra.ExactValidArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filepath := args[0]
 		if !strings.HasSuffix(filepath, ".nb") {
 			return errors.New(fmt.Sprintf("Invalid neu byte code file %s, file must end with .nb extension\n", filepath))
+		}
+
+		if outputFile == "" {
+			outputFile = strings.Split(filepath, ".")[0]
 		}
 
 		code, err := ioutil.ReadFile(filepath)
@@ -31,7 +46,9 @@ var rootCmd = &cobra.Command{
 			return errors.New(fmt.Sprintf("Error: unable to assemble code %s\n", err))
 		}
 
-		fmt.Printf("%#v\n", asm)
+		if print {
+			printByteArray(asm)
+		}
 
 		i := strings.Index(filepath, ".nb")
 		outFilepath := filepath[:i] + ".n"
@@ -69,27 +86,60 @@ func assemble(code string) ([]byte, error) {
 }
 
 func convertNum(num string, size byte) ([]byte, error) {
-	for _, base := range []int{2, 10, 16} {
-		i, err := strconv.ParseInt(num, base, int(size))
-		if err != nil {
-			continue
-		}
-
-		switch size {
-		case 8:
-			return []byte{byte(i)}, nil
-		case 16:
-			return core.I16tob(uint16(i)), nil
-		case 32:
-			return core.I32tob(uint32(i)), nil
-		case 64:
-			return core.I64tob(uint(i)), nil
-		default:
-			return nil, errors.New(fmt.Sprintf("invalid size %d for converting number", size))
-		}
+	base := 10
+	switch {
+	case strings.HasPrefix(num, "0b"):
+		base = 2
+		num = strings.TrimPrefix(num, "0b")
+	case strings.HasPrefix(num, "0x"):
+		base = 16
+		num = strings.TrimPrefix(num, "0x")
 	}
 
-	return nil, errors.New("unable to convert number as either base 2, 10 or 16")
+	i, err := strconv.ParseUint(num, base, int(size))
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("unable to convert number '%s' as a base %d number: %s", num, base, err))
+	}
+
+	switch size {
+	case 8:
+		return []byte{byte(i)}, nil
+	case 16:
+		return core.I16tob(uint16(i)), nil
+	case 32:
+		return core.I32tob(uint32(i)), nil
+	case 64:
+		return core.I64tob(uint(i)), nil
+	default:
+		return nil, errors.New(fmt.Sprintf("invalid size %d for converting number", size))
+	}
+}
+
+func printByteArray(asm []byte) {
+	var lines, line []string
+	var memoryOffset int
+	for i, b := range asm {
+		line = append(line, padStr(fmt.Sprintf("%X", b), 2))
+
+		if (i+1)%16 == 0 || i == len(asm)-1 {
+			lines = append(lines, fmt.Sprintf("%s | %s", padStr(fmt.Sprintf("%X", memoryOffset), 8), strings.Join(line, " ")))
+			line = []string{}
+			memoryOffset += 16
+		}
+	}
+	fmt.Printf("\nEXE:\n%s\n\n", strings.Join(lines, "\n"))
+}
+
+func padStr(s string, l int) string {
+	for len(s) < l {
+		s = "0" + s
+	}
+
+	if len(s) > l {
+		log.Fatalf("input value '%s' was longer than specified length %d\n", s, l)
+	}
+
+	return s
 }
 
 func Execute() error {
