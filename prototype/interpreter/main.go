@@ -74,7 +74,7 @@ type OpCode struct {
 
 func setStackSize(s *stack, code []byte, ptr int) int {
 	size := bytesToInt(code[ptr+1 : ptr+9])
-	fmt.Println("setting length to %d", size, code[ptr+1:ptr+9])
+	fmt.Printf("setting length to %d, %d", size, code[ptr+1:ptr+9])
 	s.data = make([]int, size)
 	return 8
 }

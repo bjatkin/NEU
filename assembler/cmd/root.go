@@ -12,8 +12,8 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "NeuB",
-	Short: "NeuB is an assembler that assembles neu byte code",
+	Use:   "NeuBi",
+	Short: "NeuBi is an assembler that assembles neu byte code",
 	Args:  cobra.ExactValidArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filepath := args[0]
