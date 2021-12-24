@@ -63,8 +63,22 @@ var rootCmd = &cobra.Command{
 
 func assemble(code string) ([]byte, error) {
 	var bin []byte
+
+	// filter out white space so nb code can be
+	// alligned with spaces
+	filter := func(base []string) []string {
+		var f []string
+		for i := 0; i < len(base); i++ {
+			if base[i] == "" {
+				continue
+			}
+			f = append(f, base[i])
+		}
+		return f
+	}
+
 	for _, line := range strings.Split(code, "\n") {
-		statement := strings.Split(line, " ")
+		statement := filter(strings.Split(line, " "))
 		cmd := statement[0]
 		for _, op := range core.OpCodes {
 			if cmd != op.Pat {

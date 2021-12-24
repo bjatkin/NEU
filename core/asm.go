@@ -30,7 +30,7 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int32 Add
-		Pat:     "+0",
+		Pat:     "+O",
 		Op:      0x02,
 		ArgSize: 32,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
@@ -81,7 +81,7 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int32 Minus
-		Pat:     "-0",
+		Pat:     "-O",
 		Op:      0x06,
 		ArgSize: 32,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
@@ -132,7 +132,7 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int32 Multiply
-		Pat:     "*0",
+		Pat:     "*O",
 		Op:      0x0a,
 		ArgSize: 32,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
@@ -183,7 +183,7 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int32 divide
-		Pat:     "/0",
+		Pat:     "/O",
 		Op:      0x0e,
 		ArgSize: 32,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
@@ -227,7 +227,7 @@ var OpCodes = [0xff]OpCode{
 		ArgSize: 16,
 	},
 	{ // Int32 push
-		Pat:     "<0",
+		Pat:     "<O",
 		Op:      0x12,
 		ArgSize: 32,
 	},
@@ -256,7 +256,7 @@ var OpCodes = [0xff]OpCode{
 		ArgSize: 16,
 	},
 	{ // Int32 pop
-		Pat:     ">0",
+		Pat:     ">O",
 		Op:      0x16,
 		ArgSize: 32,
 	},
@@ -264,5 +264,105 @@ var OpCodes = [0xff]OpCode{
 		Pat:     ">",
 		Op:      0x17,
 		ArgSize: 64,
+	},
+	{ // Bitwise OR
+		Pat:     "|.",
+		Op:      0x18,
+		ArgSize: 8,
+	},
+	{ // Int16 Bitwise Or
+		Pat:     "|o",
+		Op:      0x19,
+		ArgSize: 16,
+	},
+	{ // Int32 Bitwise Or
+		Pat:     "|O",
+		Op:      0x1a,
+		ArgSize: 32,
+	},
+	{ // Int64 Bitwise Or
+		Pat:     "|",
+		Op:      0x1b,
+		ArgSize: 64,
+	},
+	{ // Bitwise And
+		Pat:     "&.",
+		Op:      0x1c,
+		ArgSize: 8,
+	},
+	{ // Int16 Bitwise And
+		Pat:     "&o",
+		Op:      0x1d,
+		ArgSize: 16,
+	},
+	{ // Int32 Bitwise Or
+		Pat:     "&O",
+		Op:      0x1e,
+		ArgSize: 32,
+	},
+	{ // Int64 Bitwise Or
+		Pat:     "&",
+		Op:      0x1f,
+		ArgSize: 64,
+	},
+	{ // Bitwise Xor
+		Pat:     "^.",
+		Op:      0x20,
+		ArgSize: 8,
+	},
+	{ // Int16 Bitwise Xor
+		Pat:     "^o",
+		Op:      0x21,
+		ArgSize: 16,
+	},
+	{ // Int32 Bitwise Xor
+		Pat:     "^O",
+		Op:      0x22,
+		ArgSize: 32,
+	},
+	{ // Int64 Bitwise Xor
+		Pat:     "^",
+		Op:      0x23,
+		ArgSize: 64,
+	},
+	{ // Bitwise LeftShift
+		Pat:     "<<.",
+		Op:      0x24,
+		ArgSize: 8,
+	},
+	{ // Int16 Bitwise LeftShift
+		Pat:     "<<o",
+		Op:      0x25,
+		ArgSize: 16,
+	},
+	{ // Int32 Bitwise LeftShift
+		Pat:     "<<O",
+		Op:      0x26,
+		ArgSize: 32,
+	},
+	{ // Int64 Bitwise LeftShift
+		Pat:     "<<",
+		Op:      0x27,
+		ArgSize: 64,
+	},
+	{ // Bitwise RightShift
+		Pat:     ">>",
+		Op:      0x28,
+		ArgSize: 8,
+	},
+	{ // Int16 jBitwise RightShift
+		Pat:     ">>",
+		Op:      0x29,
+		ArgSize: 16,
+	},
+	{ // Int32 Bitwise RightShift
+		Pat:     ">>",
+		Op:      0x2a,
+		ArgSize: 32,
+	},
+	{ // Bitwise RightShift
+		Pat:     ">>",
+		Op:      0x28,
+		ArgSize: 8,
 	},
 }
