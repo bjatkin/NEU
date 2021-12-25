@@ -20,6 +20,9 @@ var (
 func init() {
 	rootCmd.PersistentFlags().StringVar(&outputFile, "output", "", "the output file to write the compiled phone to")
 	rootCmd.PersistentFlags().BoolVar(&print, "print", false, "print the binary data to the console")
+
+	// TODO: I need a different setup to get this to work the way I want
+	rootCmd.AddCommand(fmtCmd)
 }
 
 var rootCmd = &cobra.Command{
@@ -64,14 +67,24 @@ var rootCmd = &cobra.Command{
 func assemble(code string) ([]byte, error) {
 	var bin []byte
 
+	// go through a pre-processing step where we get all the named consts
+	// and replace them (e.g. [label] becomes 0x00)
+	// also shift the # sign over onto the cmd so that we can differentiate
+	// between standard commands and pointer commands
+
 	// filter out white space so nb code can be
 	// alligned with spaces
+	// also remove comments
 	filter := func(base []string) []string {
 		var f []string
 		for i := 0; i < len(base); i++ {
 			if base[i] == "" {
 				continue
 			}
+			if strings.HasPrefix(base[i], "//") {
+				break // ignore everythign after comments
+			}
+
 			f = append(f, base[i])
 		}
 		return f

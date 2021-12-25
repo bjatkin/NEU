@@ -48,3 +48,124 @@ func TestI16tob(t *testing.T) {
 		}
 	}
 }
+
+func TestIsLabel(t *testing.T) {
+	tests := []struct {
+		name  string
+		label string
+		want  bool
+	}{
+		{
+			"too short",
+			"[]",
+			false,
+		},
+		{
+			"too long",
+			"[this label is super super super long, like longer than any label really needs to be ever ever ever ever, like never, you should never make a label this long]",
+			false,
+		},
+		{
+			"missing brackes",
+			"LABEL",
+			false,
+		},
+		{
+			"nested brackets",
+			"[[[][]]]",
+			true,
+		},
+		{
+			"symboles",
+			"[~>_test]",
+			true,
+		},
+		{
+			"normal",
+			"[test_label]",
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsLabel(tt.label); got != tt.want {
+				t.Errorf("IsLabel| got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIsNamedConst(t *testing.T) {
+	tests := []struct {
+		name string
+		line []string
+		want bool
+	}{
+		{
+			"too short",
+			[]string{},
+			false,
+		},
+		{
+			"too long",
+			[]string{`\test`, "=", "0x00", "0x00"},
+			false,
+		},
+		{
+			"missing equal",
+			[]string{`\test`, "is", "0x00"},
+			false,
+		},
+		{
+			"invalid name",
+			[]string{"bad_name", "=", "0x00"},
+			false,
+		},
+		{
+			"empty value",
+			[]string{`\test`, "=", ""},
+			false,
+		},
+		{
+			"good",
+			[]string{`\test`, "=", "0x00"},
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsNamedConst(tt.line); got != tt.want {
+				t.Errorf("IsNamedConst| got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIsName(t *testing.T) {
+	tests := []struct {
+		name string
+		test string
+		want bool
+	}{
+		{
+			"invalid",
+			"fail",
+			false,
+		},
+		{
+			"valid",
+			`\test`,
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsName(tt.test); got != tt.want {
+				t.Errorf("IsName| got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

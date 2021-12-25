@@ -1,10 +1,10 @@
-\[]     = 0x0000 -- the start of the screen buffer
-\~>_Len = 0x30fe -- the length of the snake (2 bytes)
-\~>_Pos = 0x3100 -- the array of snake positions
-\i      = 0x4100 -- counter for loops (2 bytes)
-\tmp    = 0x4102 -- tmp to pop temporary stuff off the stack (8 bytes)
+\[]     = 0x0000 // the start of the screen buffer
+\~>_Len = 0x30fe // the length of the snake (2 bytes)
+\~>_Pos = 0x3100 // the array of snake positions
+\i      = 0x4100 // counter for loops (2 bytes)
+\tmp    = 0x4102 // tmp to pop temporary stuff off the stack (8 bytes)
 
--- for drawing pixels (these can be ored together)
+// for drawing pixels (these can be ored together)
 \[3---] = 0b11000000
 \[-3--] = 0b00110000
 \[--3-] = 0b00001100
@@ -21,7 +21,7 @@
 \[---1] = 0b00000001
 
 [Init_~>]
-  -- starting len is 4
+  // starting len is 4
   <o  4
   <   \~>_Len
   >o
@@ -30,18 +30,18 @@
   >o
 
 [Init_~>_()]
-  --  set ~> x pos
+  //  set ~> x pos
   <.  32
   <   \~>_Pos
   <o  #\i
   <o  2
   *o
   <0o
-  <0O  -- convert to an int64 for adding to the ~>_Pos address
+  <0O  // convert to an int64 for adding to the ~>_Pos address
   +
   >.
 
-  --  set ~> y pos
+  //  set ~> y pos
   <.  32
   <.  #\i
   +.
@@ -49,30 +49,30 @@
   <o  #\i
   <o  2
   *o
-  ++o  -- increment by 1 to get to y
+  ++o  // increment by 1 to get to y
   <0o 
-  <0O  -- convert to an int64 for adding to the ~>_Pos address
+  <0O  // convert to an int64 for adding to the ~>_Pos address
   +
   >.
 
-  --  increment i
+  //  increment i
   <o  #\i     
   ++o
   <   \i
-  >o  -- update the value of i
+  >o  // update the value of i
 
-  <o  #\i  -- compare i to len of ~>
+  <o  #\i  // compare i to len of ~>
   <o  #\~>_Len
   <o  [Init_~>_()]
-  ?>o  -- exit the loop if we've traveld the length of ~>
+  ?>o  // exit the loop if we've traveld the length of ~>
 
-  -- reset i for future loops
+  // reset i for future loops
   <0o
   <   \i
   >o
 
 [~>[]]
-  -- X
+  // X
   <   \~>_Pos
   <o  #\i
   <o  2
@@ -81,7 +81,7 @@
   <0O
   +
 
-  -- Y
+  // Y
   <   \~>_Pos
   <o  #\i
   <o  2
@@ -91,24 +91,24 @@
   <0O
   +
 
-  -- Y and X are on the stack, combine them to get an address
+  // Y and X are on the stack, combine them to get an address
   <   64
   *
   +
   <   \tmp
   >
 
-  <   [~>[]_Pxl_Ret]  -- setup the return address for Pxl[]
+  <   [~>[]_Pxl_Ret]  // setup the return address for Pxl[]
   <   #\tmp
   <   4
-  /   -- 4 pixels per byte so we need to adjust the addr
+  /   // 4 pixels per byte so we need to adjust the addr
   <   #\tmp
   <   4
-  %   -- figure out which pixel should be set
-  |>  [Pxl[]]  -- jump to the Pxl[] to draw the pictures
+  %   // figure out which pixel should be set
+  |>  [Pxl[]]  // jump to the Pxl[] to draw the pictures
 
 [~>[]_Pxl_Ret]
-  <o  #\i      -- compare i to len of ~>
+  <o  #\i      // compare i to len of ~>
   <o  #\~>_Len
   <   [~>[]]
   ?>o
@@ -116,30 +116,30 @@
 [Pxl[]]
   <   0
   ?>  [Pxl[*---]]
-  >   \tmp  -- pop off the old compare byte
+  >   \tmp  // pop off the old compare byte
   <   1
   ?>  [Pxl[-*--]]
-  >   \tmp  -- pop off the old compare byte
+  >   \tmp  // pop off the old compare byte
   >   2
   ?>  [Pxl[--*-]]
-  >   \tmp  -- pop off the old compare byte
-  >   \tmp  -- pop off the sub byte index
+  >   \tmp  // pop off the old compare byte
+  >   \tmp  // pop off the sub byte index
   >.  \[---*]
   |>  [Pxl[]_Done]
 
 [Pxl[*---]]
-  >   \tmp  -- pop off the sub byte index
+  >   \tmp  // pop off the sub byte index
   >.  \[*---]
   |>  [Pxl[]_Done]
 
 [Pxl[-*--]]
-  >   \tmp  -- pop off the sub byte index
+  >   \tmp  // pop off the sub byte index
   >.  \[-*--]
   |>  [Pxl[]_Done]
 
 [Pxl[--*-]]
-  >   \tmp  -- pop off the sub byte index
+  >   \tmp  // pop off the sub byte index
   >.   \[--*-]
 
 [Pxl[]_Done]
-  |>  -- jump back to the caller
+  |>  // jump back to the caller

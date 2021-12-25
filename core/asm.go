@@ -9,9 +9,8 @@ type OpCode struct {
 
 var OpCodes = [0xff]OpCode{
 	{ // Byte Add
-		Pat:     "+.",
-		Op:      0x00,
-		ArgSize: 8,
+		Pat: "+.",
+		Op:  0x00,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			sPt += 1
 			memory[sPt] = memory[sPt] + memory[sPt-1]
@@ -19,9 +18,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int16 Add
-		Pat:     "+o",
-		Op:      0x01,
-		ArgSize: 16,
+		Pat: "+o",
+		Op:  0x01,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			add := I16tob(Btoi16(memory[sPt:sPt+2]) + Btoi16(memory[sPt+2:sPt+4]))
 			memory[sPt+2] = add[0]
@@ -30,9 +28,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int32 Add
-		Pat:     "+O",
-		Op:      0x02,
-		ArgSize: 32,
+		Pat: "+O",
+		Op:  0x02,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			add := I32tob(Btoi32(memory[sPt:sPt+4]) + Btoi32(memory[sPt+4:sPt+8]))
 			memory[sPt+4] = add[0]
@@ -43,9 +40,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int64 Add
-		Pat:     "+",
-		Op:      0x03,
-		ArgSize: 64,
+		Pat: "+",
+		Op:  0x03,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			add := I64tob(Btoi64(memory[sPt:sPt+8]) + Btoi64(memory[sPt+8:sPt+16]))
 			memory[sPt+8] = add[0]
@@ -60,9 +56,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Byte Minus
-		Pat:     "-.",
-		Op:      0x04,
-		ArgSize: 8,
+		Pat: "-.",
+		Op:  0x04,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			sPt += 1
 			memory[sPt] = memory[sPt-1] - memory[sPt]
@@ -70,9 +65,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int16 Minus
-		Pat:     "-o",
-		Op:      0x05,
-		ArgSize: 16,
+		Pat: "-o",
+		Op:  0x05,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			add := I16tob(Btoi16(memory[sPt:sPt+2]) - Btoi16(memory[sPt+2:sPt+4]))
 			memory[sPt+2] = add[0]
@@ -81,9 +75,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int32 Minus
-		Pat:     "-O",
-		Op:      0x06,
-		ArgSize: 32,
+		Pat: "-O",
+		Op:  0x06,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			add := I32tob(Btoi32(memory[sPt:sPt+4]) - Btoi32(memory[sPt+4:sPt+8]))
 			memory[sPt+4] = add[0]
@@ -94,9 +87,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int64 Minus
-		Pat:     "-",
-		Op:      0x07,
-		ArgSize: 64,
+		Pat: "-",
+		Op:  0x07,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			add := I64tob(Btoi64(memory[sPt:sPt+8]) - Btoi64(memory[sPt+8:sPt+16]))
 			memory[sPt+8] = add[0]
@@ -111,9 +103,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Byte Multiply
-		Pat:     "*.",
-		Op:      0x08,
-		ArgSize: 8,
+		Pat: "*.",
+		Op:  0x08,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			sPt += 1
 			memory[sPt] = memory[sPt-1] * memory[sPt]
@@ -121,9 +112,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int16 Multiply
-		Pat:     "*o",
-		Op:      0x09,
-		ArgSize: 16,
+		Pat: "*o",
+		Op:  0x09,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			mul := I16tob(Btoi16(memory[sPt:sPt+2]) * Btoi16(memory[sPt+2:sPt+4]))
 			memory[sPt+2] = mul[0]
@@ -132,9 +122,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int32 Multiply
-		Pat:     "*O",
-		Op:      0x0a,
-		ArgSize: 32,
+		Pat: "*O",
+		Op:  0x0a,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			mul := I32tob(Btoi32(memory[sPt:sPt+4]) * Btoi32(memory[sPt+4:sPt+8]))
 			memory[sPt+4] = mul[0]
@@ -145,9 +134,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int64 Multiply
-		Pat:     "*",
-		Op:      0x0b,
-		ArgSize: 64,
+		Pat: "*",
+		Op:  0x0b,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			mul := I64tob(Btoi64(memory[sPt:sPt+8]) * Btoi64(memory[sPt+8:sPt+16]))
 			memory[sPt+8] = mul[0]
@@ -162,9 +150,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Byte divide
-		Pat:     "/.",
-		Op:      0x0c,
-		ArgSize: 8,
+		Pat: "/.",
+		Op:  0x0c,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			sPt += 1
 			memory[sPt] = memory[sPt-1] / memory[sPt]
@@ -172,9 +159,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int16 divide
-		Pat:     "/o",
-		Op:      0x0d,
-		ArgSize: 16,
+		Pat: "/o",
+		Op:  0x0d,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			div := I16tob(Btoi16(memory[sPt:sPt+2]) / Btoi16(memory[sPt+2:sPt+4]))
 			memory[sPt+2] = div[0]
@@ -183,9 +169,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int32 divide
-		Pat:     "/O",
-		Op:      0x0e,
-		ArgSize: 32,
+		Pat: "/O",
+		Op:  0x0e,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			div := I32tob(Btoi32(memory[sPt:sPt+4]) / Btoi32(memory[sPt+4:sPt+8]))
 			memory[sPt+4] = div[0]
@@ -196,9 +181,8 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int64 divide
-		Pat:     "/",
-		Op:      0x0f,
-		ArgSize: 64,
+		Pat: "/",
+		Op:  0x0f,
 		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
 			div := I64tob(Btoi64(memory[sPt:sPt+8]) / Btoi64(memory[sPt+8:sPt+16]))
 			memory[sPt+8] = div[0]
@@ -237,9 +221,8 @@ var OpCodes = [0xff]OpCode{
 		ArgSize: 64,
 	},
 	{ // Byte pop
-		Pat:     ">.",
-		Op:      0x14,
-		ArgSize: 64,
+		Pat: ">.",
+		Op:  0x14,
 		// TODO: I need to rethink this for serveral reasons,
 		// this allows me to write to any spot in memory, even if it's marked as read only
 		// also, would 32 bit pointers be enough here?
@@ -251,218 +234,143 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Int16 pop
-		Pat:     ">o",
-		Op:      0x15,
-		ArgSize: 16,
+		Pat: ">o",
+		Op:  0x15,
 	},
 	{ // Int32 pop
-		Pat:     ">O",
-		Op:      0x16,
-		ArgSize: 32,
+		Pat: ">O",
+		Op:  0x16,
 	},
 	{ // Int64 pop
-		Pat:     ">",
-		Op:      0x17,
-		ArgSize: 64,
+		Pat: ">",
+		Op:  0x17,
 	},
 	{ // Bitwise OR
-		Pat:     "|.",
-		Op:      0x18,
-		ArgSize: 8,
+		Pat: "|.",
+		Op:  0x18,
 	},
 	{ // Int16 Bitwise Or
-		Pat:     "|o",
-		Op:      0x19,
-		ArgSize: 16,
+		Pat: "|o",
+		Op:  0x19,
 	},
 	{ // Int32 Bitwise Or
-		Pat:     "|O",
-		Op:      0x1a,
-		ArgSize: 32,
+		Pat: "|O",
+		Op:  0x1a,
 	},
 	{ // Int64 Bitwise Or
-		Pat:     "|",
-		Op:      0x1b,
-		ArgSize: 64,
+		Pat: "|",
+		Op:  0x1b,
 	},
 	{ // Bitwise And
-		Pat:     "&.",
-		Op:      0x1c,
-		ArgSize: 8,
+		Pat: "&.",
+		Op:  0x1c,
 	},
 	{ // Int16 Bitwise And
-		Pat:     "&o",
-		Op:      0x1d,
-		ArgSize: 16,
+		Pat: "&o",
+		Op:  0x1d,
 	},
 	{ // Int32 Bitwise Or
-		Pat:     "&O",
-		Op:      0x1e,
-		ArgSize: 32,
+		Pat: "&O",
+		Op:  0x1e,
 	},
 	{ // Int64 Bitwise Or
-		Pat:     "&",
-		Op:      0x1f,
-		ArgSize: 64,
+		Pat: "&",
+		Op:  0x1f,
 	},
 	{ // Bitwise Xor
-		Pat:     "^.",
-		Op:      0x20,
-		ArgSize: 8,
+		Pat: "^.",
+		Op:  0x20,
 	},
 	{ // Int16 Bitwise Xor
-		Pat:     "^o",
-		Op:      0x21,
-		ArgSize: 16,
+		Pat: "^o",
+		Op:  0x21,
 	},
 	{ // Int32 Bitwise Xor
-		Pat:     "^O",
-		Op:      0x22,
-		ArgSize: 32,
+		Pat: "^O",
+		Op:  0x22,
 	},
 	{ // Int64 Bitwise Xor
-		Pat:     "^",
-		Op:      0x23,
-		ArgSize: 64,
+		Pat: "^",
+		Op:  0x23,
 	},
 	{ // Bitwise LeftShift
-		Pat:     "<<.",
-		Op:      0x24,
-		ArgSize: 8,
+		Pat: "<<.",
+		Op:  0x24,
 	},
 	{ // Int16 Bitwise LeftShift
-		Pat:     "<<o",
-		Op:      0x25,
-		ArgSize: 16,
+		Pat: "<<o",
+		Op:  0x25,
 	},
 	{ // Int32 Bitwise LeftShift
-		Pat:     "<<O",
-		Op:      0x26,
-		ArgSize: 32,
+		Pat: "<<O",
+		Op:  0x26,
 	},
 	{ // Int64 Bitwise LeftShift
-		Pat:     "<<",
-		Op:      0x27,
-		ArgSize: 64,
+		Pat: "<<",
+		Op:  0x27,
 	},
 	{ // Bitwise RightShift
-		Pat:     ">>",
-		Op:      0x28,
-		ArgSize: 8,
+		Pat: ">>",
+		Op:  0x28,
 	},
 	{ // Int16 jBitwise RightShift
-		Pat:     ">>",
-		Op:      0x29,
-		ArgSize: 16,
+		Pat: ">>",
+		Op:  0x29,
 	},
 	{ // Int32 Bitwise RightShift
-		Pat:     ">>",
-		Op:      0x2a,
-		ArgSize: 32,
+		Pat: ">>",
+		Op:  0x2a,
 	},
 	{ // Bitwise RightShift
-		Pat:     ">>",
-		Op:      0x2b,
-		ArgSize: 8,
+		Pat: ">>",
+		Op:  0x2b,
 	},
 	{ // Int16 Bitwise RightShift
-		Pat:     ">>",
-		Op:      0x2c,
-		ArgSize: 16,
+		Pat: ">>",
+		Op:  0x2c,
 	},
 	{ // Int32 Bitwise RightShift
-		Pat:     ">>",
-		Op:      0x2d,
-		ArgSize: 32,
+		Pat: ">>",
+		Op:  0x2d,
 	},
 	{ // Int64 Bitwise RightShift
-		Pat:     ">>",
-		Op:      0x2e,
-		ArgSize: 64,
+		Pat: ">>",
+		Op:  0x2e,
 	},
 	{ // Jump If Greater
-		Pat:     "?>.",
-		Op:      0x2f,
-		ArgSize: 64,
+		Pat: "?>.",
+		Op:  0x2f,
 	},
 	{ // Int16 Jump If Greater
-		Pat:     "?>o",
-		Op:      0x30,
-		ArgSize: 64,
+		Pat: "?>o",
+		Op:  0x30,
 	},
 	{ // Int32 Jump If Greater
-		Pat:     "?>O",
-		Op:      0x31,
-		ArgSize: 64,
+		Pat: "?>O",
+		Op:  0x31,
 	},
 	{ // Int64 Jump If Greater
-		Pat:     "?>",
-		Op:      0x32,
-		ArgSize: 64,
+		Pat: "?>",
+		Op:  0x32,
 	},
 	{ // Jump If Less
-		Pat:     "?<.",
-		Op:      0x33,
-		ArgSize: 64,
+		Pat: "?<.",
+		Op:  0x33,
 	},
 	{ // Int16 Jump If Less
-		Pat:     "?<o",
-		Op:      0x34,
-		ArgSize: 64,
+		Pat: "?<o",
+		Op:  0x34,
 	},
 	{ // Int32 Jump If Less
-		Pat:     "?<O",
-		Op:      0x35,
-		ArgSize: 64,
+		Pat: "?<O",
+		Op:  0x35,
 	},
 	{ // Int64 Jump If Less
-		Pat:     "?<",
-		Op:      0x36,
-		ArgSize: 64,
+		Pat: "?<",
+		Op:  0x36,
 	},
 	{ // Jump
-		Pat:     "|>",
-		Op:      0x37,
-		ArgSize: 64,
+		Pat: "|>",
+		Op:  0x37,
 	},
-}
-
-func IsLabel(test string) bool {
-	if len(test) < 3 {
-		return false
-	}
-
-	return test[0] == '[' && test[2] == ']'
-}
-
-func IsAddressAssignemtn(test []string) bool {
-	if len(test) != 3 {
-		return false
-	}
-
-	if IsAddressName(test[0]) {
-		return false
-	}
-
-	if test[1] != "=" {
-		return false
-	}
-
-	if len(test[2]) == 0 {
-		return false
-	}
-
-	return false
-}
-
-func IsAddressName(test string) bool {
-	if len(test) < 2 || len(test) > 20 {
-		return false
-	}
-
-	if test[0] != '\\' {
-		return false
-	}
-
-	return true
 }

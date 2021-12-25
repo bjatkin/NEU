@@ -11,7 +11,8 @@ Neu byte code is be stored in .nb files
 
 ### comments
   
-Comments in neu are specified by two dashes --.
+Comments in neu are specified by two forward slashes //.
+Anything that comes after these 2 symboles on a line will be ignored by the assembler.
 
 ### pointers/ memory addresses
 
@@ -61,10 +62,10 @@ the [L] indicates an argument which is a label to a location in the code.
 | int16 divide          | /o      | 0x0d | pop the top 4 bytes off the stack, convert them to 2 int16s, divide them, and push the result onto the stack                 |
 | int32 divide          | /O      | 0x0e | pop the top 8 bytes off the stack, convert them to 2 int32s, divide them, and push the result onto the stack                 |
 | int64 divide          | /       | 0x0f | pop the top 16 bytes off the stack, convert them to 2 int64s, divide them, and push the result onto the stack                |
-| byte push             | <. #    | 0x10 | push a new byte onto the stack (# can be an address or a literal)                                                            |
-| int16 push            | <o #    | 0x11 | push 2 new bytes onto the stack as an int16 (# can be an address or a literal)                                               |
-| int32 push            | <O #    | 0x12 | push 2 new bytes onto the stack as an int32 (# can be an address or a literal)                                               |
-| int64 push            | < #     | 0x13 | push 2 new bytes onto the stack as an int64 (# can be an address or a literal)                                               |
+| byte push             | <. #    | literal(0x10) addr(0xfc) | push a new byte onto the stack (# can be an address or a literal)                                        |
+| int16 push            | <o #    | literal(0x11) addr(0xfd) | push 2 new bytes onto the stack as an int16 (# can be an address or a literal)                           |
+| int32 push            | <O #    | literal(0x12) addr(0xfe) | push 2 new bytes onto the stack as an int32 (# can be an address or a literal)                           |
+| int64 push            | < #     | literal(0x13) addr(0xff) | push 2 new bytes onto the stack as an int64 (# can be an address or a literal)                           |
 | byte pop              | >.      | 0x14 | pop the top 9 byte off the stack and writes the last byte to the memory address in the first 8 bytes                         |
 | int16 pop             | >o      | 0x15 | pop the top 10 byte off the stack and writes the last 2 bytes to the memory address in the first 8 bytes                     |
 | int32 pop             | >O      | 0x16 | pop the top 12 byte off the stack and writes the last 4 bytes to the memory address in the first 8 bytes                     |

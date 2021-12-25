@@ -75,3 +75,46 @@ func Btoi16(from []byte) (to uint16) {
 	return uint16(from[0]) |
 		uint16(from[1])<<8
 }
+
+func IsLabel(test string) bool {
+	if len(test) < 3 {
+		return false
+	}
+	if len(test) > 25 {
+		return false
+	}
+
+	return test[0] == '[' && test[len(test)-1] == ']'
+}
+
+func IsNamedConst(test []string) bool {
+	if len(test) != 3 {
+		return false
+	}
+
+	if !IsName(test[0]) {
+		return false
+	}
+
+	if test[1] != "=" {
+		return false
+	}
+
+	if len(test[2]) == 0 {
+		return false
+	}
+
+	return true
+}
+
+func IsName(test string) bool {
+	if len(test) < 2 || len(test) > 25 {
+		return false
+	}
+
+	if test[0] != '\\' {
+		return false
+	}
+
+	return true
+}
