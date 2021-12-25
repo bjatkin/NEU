@@ -4,7 +4,7 @@ type OpCode struct {
 	Pat     string
 	Op      byte
 	ArgSize byte
-	Fn      func(memory []byte, ptr, stackPtr int) (ptrShift int, stackPtrShift int)
+	Fn      func(memory []byte, ePtr, sPtr int) (ePtDelta int, sPtDelta int)
 }
 
 var OpCodes = [0xff]OpCode{
@@ -245,9 +245,9 @@ var OpCodes = [0xff]OpCode{
 		// also, would 32 bit pointers be enough here?
 		// Also, I need to write a test for this function here
 		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
-			addr := Btoi64(memory[ePt+1 : ePt+9])
-			memory[addr] = memory[sPt]
-			return 9, 1
+			addr := Btoi64(memory[sPt : sPt+8])
+			memory[addr] = memory[sPt+8]
+			return 1, 9
 		},
 	},
 	{ // Int16 pop
@@ -362,7 +362,107 @@ var OpCodes = [0xff]OpCode{
 	},
 	{ // Bitwise RightShift
 		Pat:     ">>",
-		Op:      0x28,
+		Op:      0x2b,
 		ArgSize: 8,
 	},
+	{ // Int16 Bitwise RightShift
+		Pat:     ">>",
+		Op:      0x2c,
+		ArgSize: 16,
+	},
+	{ // Int32 Bitwise RightShift
+		Pat:     ">>",
+		Op:      0x2d,
+		ArgSize: 32,
+	},
+	{ // Int64 Bitwise RightShift
+		Pat:     ">>",
+		Op:      0x2e,
+		ArgSize: 64,
+	},
+	{ // Jump If Greater
+		Pat:     "?>.",
+		Op:      0x2f,
+		ArgSize: 64,
+	},
+	{ // Int16 Jump If Greater
+		Pat:     "?>o",
+		Op:      0x30,
+		ArgSize: 64,
+	},
+	{ // Int32 Jump If Greater
+		Pat:     "?>O",
+		Op:      0x31,
+		ArgSize: 64,
+	},
+	{ // Int64 Jump If Greater
+		Pat:     "?>",
+		Op:      0x32,
+		ArgSize: 64,
+	},
+	{ // Jump If Less
+		Pat:     "?<.",
+		Op:      0x33,
+		ArgSize: 64,
+	},
+	{ // Int16 Jump If Less
+		Pat:     "?<o",
+		Op:      0x34,
+		ArgSize: 64,
+	},
+	{ // Int32 Jump If Less
+		Pat:     "?<O",
+		Op:      0x35,
+		ArgSize: 64,
+	},
+	{ // Int64 Jump If Less
+		Pat:     "?<",
+		Op:      0x36,
+		ArgSize: 64,
+	},
+	{ // Jump
+		Pat:     "|>",
+		Op:      0x37,
+		ArgSize: 64,
+	},
+}
+
+func IsLabel(test string) bool {
+	if len(test) < 3 {
+		return false
+	}
+
+	return test[0] == '[' && test[2] == ']'
+}
+
+func IsAddressAssignemtn(test []string) bool {
+	if len(test) != 3 {
+		return false
+	}
+
+	if IsAddressName(test[0]) {
+		return false
+	}
+
+	if test[1] != "=" {
+		return false
+	}
+
+	if len(test[2]) == 0 {
+		return false
+	}
+
+	return false
+}
+
+func IsAddressName(test string) bool {
+	if len(test) < 2 || len(test) > 20 {
+		return false
+	}
+
+	if test[0] != '\\' {
+		return false
+	}
+
+	return true
 }

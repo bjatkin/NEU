@@ -750,3 +750,40 @@ func TestBytePush(t *testing.T) {
 		})
 	}
 }
+
+func TestBytePop(t *testing.T) {
+	tests := []struct {
+		name         string
+		memory       []byte
+		sPt          int
+		ePt          int
+		wantEPtDelta int
+		wantSPtDelta int
+		wantMemory   []byte
+	}{
+		{
+			"normal",
+			[]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0x14},
+			1,
+			10,
+			1,
+			9,
+			[]byte{5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0x14},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ePtDelta, sPtDelta := OpCodes[0x14].Fn(tt.memory, tt.ePt, tt.sPt)
+			if ePtDelta != tt.wantEPtDelta {
+				t.Errorf("BytePop| ePtDelta was wrong, got: %d, want: %d", ePtDelta, tt.wantEPtDelta)
+			}
+			if sPtDelta != tt.wantSPtDelta {
+				t.Errorf("BytePop| sPtDelta was wrong, got: %d, want: %d", sPtDelta, tt.wantSPtDelta)
+			}
+			if !reflect.DeepEqual(tt.memory, tt.wantMemory) {
+				t.Errorf("BytePop| memory change was wrong, got: %v, want: %v", tt.memory, tt.wantMemory)
+			}
+		})
+	}
+}
