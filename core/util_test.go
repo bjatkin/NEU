@@ -169,3 +169,35 @@ func TestIsName(t *testing.T) {
 		})
 	}
 }
+
+func TestIsAddrCMD(t *testing.T) {
+	tests := []struct {
+		name string
+		expr []string
+		want bool
+	}{
+		{
+			"push cmd",
+			[]string{"<.", `\test`},
+			false,
+		},
+		{
+			"addr cmd",
+			[]string{"<.", "#0x00"},
+			true,
+		},
+		{
+			"addr with label",
+			[]string{"<.", `#\test`},
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsAddrCMD(tt.expr); got != tt.want {
+				t.Errorf("IsAddrCMD| got %v but wanted %v", got, tt.want)
+			}
+		})
+	}
+}

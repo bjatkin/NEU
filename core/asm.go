@@ -426,19 +426,23 @@ var OpCodes = [0xff]OpCode{
 		Op:  0x44,
 	},
 	{ // Byte push (addr)
-		Pat: "<.#",
-		Op:  0x45,
+		Pat:     "<.#",
+		Op:      0x45,
+		ArgSize: 64,
 	},
 	{ // Int16 push (addr)
-		Pat: "<o#",
-		Op:  0x46,
+		Pat:     "<o#",
+		Op:      0x46,
+		ArgSize: 64,
 	},
 	{ // Int32 push (addr)
-		Pat: "<O#",
-		Op:  0x47,
+		Pat:     "<O#",
+		Op:      0x47,
+		ArgSize: 64,
 	},
 	{ // Int64 push (addr)
-		Pat: "<#",
-		Op:  0x48,
+		Pat:     "<#",
+		Op:      0x48,
+		ArgSize: 64,
 	},
 }

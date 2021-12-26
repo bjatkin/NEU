@@ -136,7 +136,7 @@ func IsAddrCMD(test []string) bool {
 	}
 
 	// the first arg must start with '#'
-	if test[1][0] == '#' {
+	if test[1][0] != '#' {
 		return false
 	}
 
