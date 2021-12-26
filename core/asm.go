@@ -310,67 +310,135 @@ var OpCodes = [0xff]OpCode{
 		Op:  0x27,
 	},
 	{ // Bitwise RightShift
-		Pat: ">>",
+		Pat: ">>.",
 		Op:  0x28,
 	},
 	{ // Int16 jBitwise RightShift
-		Pat: ">>",
+		Pat: ">>o",
 		Op:  0x29,
 	},
 	{ // Int32 Bitwise RightShift
-		Pat: ">>",
+		Pat: ">>O",
 		Op:  0x2a,
 	},
 	{ // Bitwise RightShift
 		Pat: ">>",
 		Op:  0x2b,
 	},
-	{ // Int16 Bitwise RightShift
-		Pat: ">>",
-		Op:  0x2c,
-	},
-	{ // Int32 Bitwise RightShift
-		Pat: ">>",
-		Op:  0x2d,
-	},
-	{ // Int64 Bitwise RightShift
-		Pat: ">>",
-		Op:  0x2e,
-	},
 	{ // Jump If Greater
 		Pat: "?>.",
-		Op:  0x2f,
+		Op:  0x2c,
 	},
 	{ // Int16 Jump If Greater
 		Pat: "?>o",
-		Op:  0x30,
+		Op:  0x2d,
 	},
 	{ // Int32 Jump If Greater
 		Pat: "?>O",
-		Op:  0x31,
+		Op:  0x2e,
 	},
 	{ // Int64 Jump If Greater
 		Pat: "?>",
-		Op:  0x32,
+		Op:  0x2f,
 	},
 	{ // Jump If Less
 		Pat: "?<.",
-		Op:  0x33,
+		Op:  0x30,
 	},
 	{ // Int16 Jump If Less
 		Pat: "?<o",
-		Op:  0x34,
+		Op:  0x31,
 	},
 	{ // Int32 Jump If Less
 		Pat: "?<O",
-		Op:  0x35,
+		Op:  0x32,
 	},
 	{ // Int64 Jump If Less
 		Pat: "?<",
-		Op:  0x36,
+		Op:  0x33,
 	},
 	{ // Jump
 		Pat: "|>",
+		Op:  0x34,
+	},
+	{ // byte mod
+		Pat: "%.",
+		Op:  0x35,
+	},
+	{ // Int16 mod
+		Pat: "%o",
+		Op:  0x36,
+	},
+	{ // Int32 mod
+		Pat: "%O",
 		Op:  0x37,
+	},
+	{ // Int64 mod
+		Pat: "%",
+		Op:  0x38,
+	},
+	{ // Push Byte 0
+		Pat: "<0.",
+		Op:  0x39,
+	},
+	{ // Push Int16 0
+		Pat: "<0o",
+		Op:  0x3a,
+	},
+	{ // Push Int32 0
+		Pat: "<0O",
+		Op:  0x3b,
+	},
+	{ // Push Int64 0
+		Pat: "<0",
+		Op:  0x3c,
+	},
+	{ // Dec Byte
+		Pat: "--.",
+		Op:  0x3d,
+	},
+	{ // Dec Int16
+		Pat: "--o",
+		Op:  0x3e,
+	},
+	{ // Dec Int32
+		Pat: "--O",
+		Op:  0x3f,
+	},
+	{ // Dec Int64
+		Pat: "--",
+		Op:  0x40,
+	},
+	{ // Inc Byte
+		Pat: "++.",
+		Op:  0x41,
+	},
+	{ // Inc Int16
+		Pat: "++o",
+		Op:  0x42,
+	},
+	{ // Inc Int32
+		Pat: "++O",
+		Op:  0x43,
+	},
+	{ // Inc Int64
+		Pat: "++",
+		Op:  0x44,
+	},
+	{ // Byte push (addr)
+		Pat: "<.#",
+		Op:  0x45,
+	},
+	{ // Int16 push (addr)
+		Pat: "<o#",
+		Op:  0x46,
+	},
+	{ // Int32 push (addr)
+		Pat: "<O#",
+		Op:  0x47,
+	},
+	{ // Int64 push (addr)
+		Pat: "<#",
+		Op:  0x48,
 	},
 }

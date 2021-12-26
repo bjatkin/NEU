@@ -67,11 +67,6 @@ var rootCmd = &cobra.Command{
 func assemble(code string) ([]byte, error) {
 	var bin []byte
 
-	// go through a pre-processing step where we get all the named consts
-	// and replace them (e.g. [label] becomes 0x00)
-	// also shift the # sign over onto the cmd so that we can differentiate
-	// between standard commands and pointer commands
-
 	// filter out white space so nb code can be
 	// alligned with spaces
 	// also remove comments
@@ -90,22 +85,74 @@ func assemble(code string) ([]byte, error) {
 		return f
 	}
 
+	// pass 1: filter out spaces and comments
+	// fill out the named constants map
+	// rewrite pointer (#) vs literal commands
+	namedConsts := map[string]string{}
+	var expressions [][]string
 	for _, line := range strings.Split(code, "\n") {
-		statement := filter(strings.Split(line, " "))
-		cmd := statement[0]
+		expr := filter(strings.Split(line, " "))
+		if len(expr) == 0 {
+			// don't include empty lines
+			continue
+		}
+
+		if core.IsNamedConst(expr) {
+			// TODO: error out of there are conflicting names
+			namedConsts[expr[0]] = expr[2]
+
+			// named constand declaration lines are not included
+			// in the final byte code and are just available
+			// for the convience of the writer
+			continue
+		}
+
+		if core.IsAddrCMD(expr) {
+			expr[0] += "#"
+			expr[1] = expr[1][1:]
+		}
+
+		expressions = append(expressions, expr)
+	}
+
+	// PRINT POST PASS 1
+	for _, expr := range expressions {
+		fmt.Println(expr)
+	}
+
+	// replace all the named constants in the code
+	for i := 0; i < len(expressions); i++ {
+		expr := expressions[i]
+
+		if len(expr) < 2 {
+			continue
+		}
+
+		if c, ok := namedConsts[expr[1]]; ok {
+			expr[1] = c
+		}
+	}
+
+	for _, expr := range expressions {
+		cmd := expr[0]
+		var found bool
 		for _, op := range core.OpCodes {
 			if cmd != op.Pat {
 				continue
 			}
 
+			found = true
 			bin = append(bin, op.Op)
-			for _, arg := range statement[1:] {
+			for _, arg := range expr[1:] {
 				b, err := convertNum(arg, op.ArgSize)
 				if err != nil {
 					return nil, err
 				}
 				bin = append(bin, b...)
 			}
+		}
+		if !found {
+			return nil, errors.New("unable to write command to exe " + cmd)
 		}
 	}
 

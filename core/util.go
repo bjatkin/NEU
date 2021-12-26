@@ -1,6 +1,9 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	IntWidth = 8
@@ -107,12 +110,33 @@ func IsNamedConst(test []string) bool {
 	return true
 }
 
+// IsName checks if the given string is a valid name
+// names always start with \ and must have at leas on additional character
+// names can not contain spaces
 func IsName(test string) bool {
+	if strings.ContainsAny(test, " ") {
+		return false
+	}
+
 	if len(test) < 2 || len(test) > 25 {
 		return false
 	}
 
 	if test[0] != '\\' {
+		return false
+	}
+
+	return true
+}
+
+func IsAddrCMD(test []string) bool {
+	// addr comands have a least 1 arg
+	if len(test) < 2 || test[1] == "" {
+		return false
+	}
+
+	// the first arg must start with '#'
+	if test[1][0] == '#' {
 		return false
 	}
 

@@ -62,10 +62,10 @@ the [L] indicates an argument which is a label to a location in the code.
 | int16 divide          | /o      | 0x0d | pop the top 4 bytes off the stack, convert them to 2 int16s, divide them, and push the result onto the stack                 |
 | int32 divide          | /O      | 0x0e | pop the top 8 bytes off the stack, convert them to 2 int32s, divide them, and push the result onto the stack                 |
 | int64 divide          | /       | 0x0f | pop the top 16 bytes off the stack, convert them to 2 int64s, divide them, and push the result onto the stack                |
-| byte push             | <. #    | literal(0x10) addr(0xfc) | push a new byte onto the stack (# can be an address or a literal)                                        |
-| int16 push            | <o #    | literal(0x11) addr(0xfd) | push 2 new bytes onto the stack as an int16 (# can be an address or a literal)                           |
-| int32 push            | <O #    | literal(0x12) addr(0xfe) | push 2 new bytes onto the stack as an int32 (# can be an address or a literal)                           |
-| int64 push            | < #     | literal(0x13) addr(0xff) | push 2 new bytes onto the stack as an int64 (# can be an address or a literal)                           |
+| byte push             | <. #    | literal(0x10) addr(0x45) | push a new byte onto the stack (# can be an address or a literal)                                        |
+| int16 push            | <o #    | literal(0x11) addr(0x46) | push 2 new bytes onto the stack as an int16 (# can be an address or a literal)                           |
+| int32 push            | <O #    | literal(0x12) addr(0x47) | push 2 new bytes onto the stack as an int32 (# can be an address or a literal)                           |
+| int64 push            | < #     | literal(0x13) addr(0x48) | push 2 new bytes onto the stack as an int64 (# can be an address or a literal)                           |
 | byte pop              | >.      | 0x14 | pop the top 9 byte off the stack and writes the last byte to the memory address in the first 8 bytes                         |
 | int16 pop             | >o      | 0x15 | pop the top 10 byte off the stack and writes the last 2 bytes to the memory address in the first 8 bytes                     |
 | int32 pop             | >O      | 0x16 | pop the top 12 byte off the stack and writes the last 4 bytes to the memory address in the first 8 bytes                     |
@@ -114,7 +114,7 @@ the [L] indicates an argument which is a label to a location in the code.
 | inc byte              | ++.     | 0x41 | pop the top byte off the stack, add one and push the result onto the stack                                                   |
 | inc int16             | ++o     | 0x42 | pop the top 2 bytes off the stack, convert them to an int16, subtract one and push the result onto the stack                 |
 | inc int32             | ++O     | 0x43 | pop the top 4 bytes off the stack, convert them to an int32, subtract one and push the result onto the stack                 |
-| inc int64             | ++      | 0x45 | pop the top 8 bytes off the stack, convert them to an int64, subtract one and push the result onto the stack                 |
+| inc int64             | ++      | 0x44 | pop the top 8 bytes off the stack, convert them to an int64, subtract one and push the result onto the stack                 |
 | label                 | [L]     | ---- | label marks a section of the code.                                                                                           |
 | name address          | _ = #   | ---- | specifiy a name for a numerical constant that can be used later in your code                                                 |
 | memory address        | #       | ---- | converts a numerical literal into a memory address                                                                           |
@@ -150,6 +150,7 @@ Thus the final state of the stack after this progam runs is:
 * Should we use 32 or maybe even 64 bits as the default size for the buffer? There are some challenges that come along with that but some benefits as well.
   - real programs will be working with 32/ 64 bit numbers much more often than small 8 or 16 bit numbers.
   - wastes space and given these need to be sent over the network that's important (although it does so in a way that may be simple to compress?).
+  - how do we get smaller values (like byte or int16) to work correctly/ overflow in the right way?
   - we are gonna waste cpu cycles combining bytes into int64 or int32's all the time.
   - what's the point of having a 1 bit op code if it has to be stuck into a 32 bit int anyway?
 
@@ -159,3 +160,4 @@ Thus the final state of the stack after this progam runs is:
 * add a version for future proofness?
 * seems like I'm working at the resolution of my pointers a lot so 64 bits
 * web asm and java byte code both have the concept of 'locals' should I adopt something like this?
+* should their be support for floats? signed ints?
