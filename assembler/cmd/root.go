@@ -115,12 +115,6 @@ func assemble(code string) ([]byte, error) {
 		expressions = append(expressions, expr)
 	}
 
-	// PRINT POST PASS 1
-	fmt.Println("POST PASS 1 CODE: ")
-	for _, expr := range expressions {
-		fmt.Println(" - ", expr)
-	}
-
 	// pass 2: replace all the named constants in the code
 	for i := 0; i < len(expressions); i++ {
 		expr := expressions[i]
@@ -132,12 +126,6 @@ func assemble(code string) ([]byte, error) {
 		if c, ok := namedConsts[expr[1]]; ok {
 			expr[1] = c
 		}
-	}
-
-	// PRINT POST PASS 2
-	fmt.Println("POST PASS 2 CODE:")
-	for _, expr := range expressions {
-		fmt.Println(" - ", expr)
 	}
 
 	for _, expr := range expressions {
