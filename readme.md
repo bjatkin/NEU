@@ -90,15 +90,15 @@ the [L] indicates an argument which is a label to a location in the code.
 | int16 bit right shift | >>o     | 0x29 | pop the top 2 bytes off the stack, convert it to an int16, shift it right # places and push the result onto the stack        |
 | int32 bit right shift | >>O     | 0x2a | pop the top 4 bytes off the stack, convert it to an int32, shift it right # places and push the result onto the stack        |
 | int64 bit right shift | >>      | 0x2b | pop the top 8 bytes off the stack, convert it to an int64, shift it right # places and push the result onto the stack        |
-| jump if greater       | ?>.     | 0x2c | jump the execution pointer to the specified memory address if the top byte on the stack is larger than the second byte       |
-| int16 jump if greater | ?>o     | 0x2d | jump the execution pointer to the specified memory address if the top int16 on the stack is larger than the second int16     |
-| int32 jump if greater | ?>O     | 0x2e | jump the execution pointer to the specified memory address if the top int32 on the stack is larger than the second int32     |
-| int64 jump if greater | ?>      | 0x2f | jump the execution pointer to the specified memory address if the top int64 on the stack is larger than the second int32     |
-| jump if less          | ?<.     | 0x30 | jump the execution pointer to the specified memory address if the top byte on the stack is smaller than the second byte      |
-| int16 jump if less    | ?<o     | 0x31 | jump the execution pointer to the specified memory address if the top int16 on the stack is smaller than the second int16    |
-| int32 jump if less    | ?<O     | 0x32 | jump the execution pointer to the specified memory address if the top int32 on the stack is smaller than the second int32    |
-| int64 jump if less    | ?<      | 0x33 | jump the execution pointer to the specified memory address if the top int64 on the stack is smaller than the second int32    |
-| jump                  | |>      | 0x34 | jump the execution pointer to the specified memory address                                                                   |
+| jump if greater       | ?>.     | 0x2c | jump the execution pointer memory address on the stack if the top byte on the stack is larger than the second byte           |
+| int16 jump if greater | ?>o     | 0x2d | jump the execution pointer memory address on the stack if the top int16 on the stack is larger than the second int16         |
+| int32 jump if greater | ?>O     | 0x2e | jump the execution pointer memory address on the stack if the top int32 on the stack is larger than the second int32         |
+| int64 jump if greater | ?>      | 0x2f | jump the execution pointer memory address on the stack if the top int64 on the stack is larger than the second int32         |
+| jump if less          | ?<.     | 0x30 | jump the execution pointer memory address on the stack if the top byte on the stack is smaller than the second byte          |
+| int16 jump if less    | ?<o     | 0x31 | jump the execution pointer memory address on the stack if the top int16 on the stack is smaller than the second int16        |
+| int32 jump if less    | ?<O     | 0x32 | jump the execution pointer memory address on the stack if the top int32 on the stack is smaller than the second int32        |
+| int64 jump if less    | ?<      | 0x33 | jump the execution pointer memory address on the stack if the top int64 on the stack is smaller than the second int32        |
+| jump                  | |>      | 0x34 | jump the execution pointer memory address on the stack                                                                       |
 | byte mod              | %.      | 0x35 | pop the top two bytes off the stack, mod the first value by the second, push the result onto the stack                       |
 | int16 mod             | %o      | 0x36 | pop the top 4 bytes off the stack, convert them to 2 int16s, mod them, and push the result onto the stack                    |
 | int32 mod             | %O      | 0x37 | pop the top 8 bytes off the stack, convert them to 2 int32s, mod them, and push the result onto the stack                    |
@@ -115,6 +115,7 @@ the [L] indicates an argument which is a label to a location in the code.
 | inc int16             | ++o     | 0x42 | pop the top 2 bytes off the stack, convert them to an int16, subtract one and push the result onto the stack                 |
 | inc int32             | ++O     | 0x43 | pop the top 4 bytes off the stack, convert them to an int32, subtract one and push the result onto the stack                 |
 | inc int64             | ++      | 0x44 | pop the top 8 bytes off the stack, convert them to an int64, subtract one and push the result onto the stack                 |
+| break point           | (/)     | 0x49 | break point for debugging                                                                                                    |
 | label                 | [L]     | ---- | label marks a section of the code.                                                                                           |
 | name address          | _ = #   | ---- | specifiy a name for a numerical constant that can be used later in your code                                                 |
 | memory address        | #       | ---- | converts a numerical literal into a memory address                                                                           |
@@ -161,3 +162,7 @@ Thus the final state of the stack after this progam runs is:
 * seems like I'm working at the resolution of my pointers a lot so 64 bits
 * web asm and java byte code both have the concept of 'locals' should I adopt something like this?
 * should their be support for floats? signed ints?
+* first class support for functions? first class support for arrays?
+* we need to improve the compile error messages (they really suck right now)
+* function calls and looping need to have dedicated byte codes, right now they are very verbose
+* should we add simple template type stuff (like php import?)

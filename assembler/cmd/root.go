@@ -85,6 +85,9 @@ func assemble(code string) ([]byte, error) {
 		return f
 	}
 
+	// replace tabs with spaces
+	code = strings.ReplaceAll(code, "\t", "  ")
+
 	// pass 1: filter out spaces and comments
 	// fill out the named constants map
 	// rewrite pointer (#) vs literal commands
@@ -128,8 +131,18 @@ func assemble(code string) ([]byte, error) {
 		}
 	}
 
+	labelMap := map[string]uint{}
+	labelReplace := map[string][]int{}
+	// pass 3: convert the code to binary
+	// fill out the label map, and the label arg index
 	for _, expr := range expressions {
 		cmd := expr[0]
+		if core.IsLabel(cmd) {
+			labelMap[cmd] = uint(len(bin))
+			// labels aren't included in the byte code
+			continue
+		}
+
 		var found bool
 		for _, op := range core.OpCodes {
 			if cmd != op.Pat {
@@ -139,15 +152,40 @@ func assemble(code string) ([]byte, error) {
 			found = true
 			bin = append(bin, op.Op)
 			for _, arg := range expr[1:] {
+				if core.IsLabel(arg) {
+					labelReplace[arg] = append(labelReplace[arg], len(bin))
+					bin = append(bin, core.I64tob(0)...)
+					continue
+				}
+
 				b, err := convertNum(arg, op.ArgSize)
 				if err != nil {
-					return nil, err
+					return nil, errors.New(fmt.Sprintf("unable to parse expression '%s' %s", strings.Join(expr, " "), err))
 				}
 				bin = append(bin, b...)
 			}
 		}
 		if !found {
-			return nil, errors.New("unable to write command to exe " + cmd)
+			return nil, errors.New(fmt.Sprintf("unable to write command to exe '%s'", cmd))
+		}
+	}
+
+	// replace all the labels
+	for label, idxs := range labelReplace {
+		if _, ok := labelMap[label]; !ok {
+			return nil, errors.New("undefined label " + label)
+		}
+
+		replace := core.I64tob(labelMap[label])
+		for _, i := range idxs {
+			bin[i] = replace[0]
+			bin[i+1] = replace[1]
+			bin[i+2] = replace[2]
+			bin[i+3] = replace[3]
+			bin[i+4] = replace[4]
+			bin[i+5] = replace[5]
+			bin[i+6] = replace[6]
+			bin[i+7] = replace[7]
 		}
 	}
 

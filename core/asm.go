@@ -4,14 +4,14 @@ type OpCode struct {
 	Pat     string
 	Op      byte
 	ArgSize byte
-	Fn      func(memory []byte, ePtr, sPtr int) (ePtDelta int, sPtDelta int)
+	Fn      func(memory []byte, ePtr, sPtr int) (ePtDelta, sPtDelta int)
 }
 
 var OpCodes = [0xff]OpCode{
 	{ // Byte Add
 		Pat: "+.",
 		Op:  0x00,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			sPt += 1
 			memory[sPt] = memory[sPt] + memory[sPt-1]
 			return 1, 1
@@ -20,7 +20,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int16 Add
 		Pat: "+o",
 		Op:  0x01,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			add := I16tob(Btoi16(memory[sPt:sPt+2]) + Btoi16(memory[sPt+2:sPt+4]))
 			memory[sPt+2] = add[0]
 			memory[sPt+3] = add[1]
@@ -30,7 +30,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int32 Add
 		Pat: "+O",
 		Op:  0x02,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			add := I32tob(Btoi32(memory[sPt:sPt+4]) + Btoi32(memory[sPt+4:sPt+8]))
 			memory[sPt+4] = add[0]
 			memory[sPt+5] = add[1]
@@ -42,7 +42,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int64 Add
 		Pat: "+",
 		Op:  0x03,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			add := I64tob(Btoi64(memory[sPt:sPt+8]) + Btoi64(memory[sPt+8:sPt+16]))
 			memory[sPt+8] = add[0]
 			memory[sPt+9] = add[1]
@@ -58,7 +58,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Byte Minus
 		Pat: "-.",
 		Op:  0x04,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			sPt += 1
 			memory[sPt] = memory[sPt-1] - memory[sPt]
 			return 1, 1
@@ -67,7 +67,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int16 Minus
 		Pat: "-o",
 		Op:  0x05,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			add := I16tob(Btoi16(memory[sPt:sPt+2]) - Btoi16(memory[sPt+2:sPt+4]))
 			memory[sPt+2] = add[0]
 			memory[sPt+3] = add[1]
@@ -77,7 +77,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int32 Minus
 		Pat: "-O",
 		Op:  0x06,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			add := I32tob(Btoi32(memory[sPt:sPt+4]) - Btoi32(memory[sPt+4:sPt+8]))
 			memory[sPt+4] = add[0]
 			memory[sPt+5] = add[1]
@@ -89,7 +89,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int64 Minus
 		Pat: "-",
 		Op:  0x07,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			add := I64tob(Btoi64(memory[sPt:sPt+8]) - Btoi64(memory[sPt+8:sPt+16]))
 			memory[sPt+8] = add[0]
 			memory[sPt+9] = add[1]
@@ -105,7 +105,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Byte Multiply
 		Pat: "*.",
 		Op:  0x08,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			sPt += 1
 			memory[sPt] = memory[sPt-1] * memory[sPt]
 			return 1, 1
@@ -114,7 +114,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int16 Multiply
 		Pat: "*o",
 		Op:  0x09,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			mul := I16tob(Btoi16(memory[sPt:sPt+2]) * Btoi16(memory[sPt+2:sPt+4]))
 			memory[sPt+2] = mul[0]
 			memory[sPt+3] = mul[1]
@@ -124,7 +124,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int32 Multiply
 		Pat: "*O",
 		Op:  0x0a,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			mul := I32tob(Btoi32(memory[sPt:sPt+4]) * Btoi32(memory[sPt+4:sPt+8]))
 			memory[sPt+4] = mul[0]
 			memory[sPt+5] = mul[1]
@@ -136,7 +136,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int64 Multiply
 		Pat: "*",
 		Op:  0x0b,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			mul := I64tob(Btoi64(memory[sPt:sPt+8]) * Btoi64(memory[sPt+8:sPt+16]))
 			memory[sPt+8] = mul[0]
 			memory[sPt+9] = mul[1]
@@ -152,7 +152,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Byte divide
 		Pat: "/.",
 		Op:  0x0c,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			sPt += 1
 			memory[sPt] = memory[sPt-1] / memory[sPt]
 			return 1, 1
@@ -161,7 +161,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int16 divide
 		Pat: "/o",
 		Op:  0x0d,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			div := I16tob(Btoi16(memory[sPt:sPt+2]) / Btoi16(memory[sPt+2:sPt+4]))
 			memory[sPt+2] = div[0]
 			memory[sPt+3] = div[1]
@@ -171,7 +171,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int32 divide
 		Pat: "/O",
 		Op:  0x0e,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			div := I32tob(Btoi32(memory[sPt:sPt+4]) / Btoi32(memory[sPt+4:sPt+8]))
 			memory[sPt+4] = div[0]
 			memory[sPt+5] = div[1]
@@ -183,7 +183,7 @@ var OpCodes = [0xff]OpCode{
 	{ // Int64 divide
 		Pat: "/",
 		Op:  0x0f,
-		Fn: func(memory []byte, _, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, _, sPt int) (ePtDelta, sPtDelta int) {
 			div := I64tob(Btoi64(memory[sPt:sPt+8]) / Btoi64(memory[sPt+8:sPt+16]))
 			memory[sPt+8] = div[0]
 			memory[sPt+9] = div[1]
@@ -196,29 +196,52 @@ var OpCodes = [0xff]OpCode{
 			return 1, 8
 		},
 	},
-	{ // Byte push
+	{ // Byte Push
 		Pat:     "<.",
 		Op:      0x10,
 		ArgSize: 8,
-		Fn: func(memory []byte, ePt, sPt int) (ePtDelta int, sPtDelta int) {
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
 			memory[sPt-1] = memory[ePt+1]
 			return 2, -1
 		},
 	},
-	{ // Int16 push
+	{ // Int16 Push
 		Pat:     "<o",
 		Op:      0x11,
 		ArgSize: 16,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			memory[sPt-2] = memory[ePt+1]
+			memory[sPt-1] = memory[ePt+2]
+			return 3, -2
+		},
 	},
 	{ // Int32 push
 		Pat:     "<O",
 		Op:      0x12,
 		ArgSize: 32,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			memory[sPt-4] = memory[ePt+1]
+			memory[sPt-3] = memory[ePt+2]
+			memory[sPt-2] = memory[ePt+3]
+			memory[sPt-1] = memory[ePt+4]
+			return 5, -4
+		},
 	},
 	{ // Int64 push
 		Pat:     "<",
 		Op:      0x13,
 		ArgSize: 64,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			memory[sPt-8] = memory[ePt+1]
+			memory[sPt-7] = memory[ePt+2]
+			memory[sPt-6] = memory[ePt+3]
+			memory[sPt-5] = memory[ePt+4]
+			memory[sPt-4] = memory[ePt+5]
+			memory[sPt-3] = memory[ePt+6]
+			memory[sPt-2] = memory[ePt+7]
+			memory[sPt-1] = memory[ePt+8]
+			return 9, -8
+		},
 	},
 	{ // Byte pop
 		Pat: ">.",
@@ -236,30 +259,86 @@ var OpCodes = [0xff]OpCode{
 	{ // Int16 pop
 		Pat: ">o",
 		Op:  0x15,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			addr := Btoi64(memory[sPt : sPt+8])
+			memory[addr] = memory[sPt+8]
+			memory[addr+1] = memory[sPt+9]
+			return 1, 10
+		},
 	},
 	{ // Int32 pop
 		Pat: ">O",
 		Op:  0x16,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			addr := Btoi64(memory[sPt : sPt+8])
+			memory[addr] = memory[sPt+8]
+			memory[addr+1] = memory[sPt+9]
+			memory[addr+2] = memory[sPt+10]
+			memory[addr+3] = memory[sPt+11]
+			return 1, 12
+		},
 	},
 	{ // Int64 pop
 		Pat: ">",
 		Op:  0x17,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			addr := Btoi64(memory[sPt : sPt+8])
+			memory[addr] = memory[sPt+8]
+			memory[addr+1] = memory[sPt+9]
+			memory[addr+2] = memory[sPt+10]
+			memory[addr+3] = memory[sPt+11]
+			memory[addr+4] = memory[sPt+12]
+			memory[addr+5] = memory[sPt+13]
+			memory[addr+6] = memory[sPt+14]
+			memory[addr+7] = memory[sPt+15]
+			return 1, 16
+		},
 	},
 	{ // Bitwise OR
 		Pat: "|.",
 		Op:  0x18,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			memory[sPt+1] = memory[sPt] | memory[sPt+1]
+			return 1, 1
+		},
 	},
 	{ // Int16 Bitwise Or
 		Pat: "|o",
 		Op:  0x19,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			or := I16tob(Btoi16(memory[sPt:sPt+2]) | Btoi16(memory[sPt+2:sPt+4]))
+			memory[sPt+2] = or[0]
+			memory[sPt+3] = or[1]
+			return 1, 2
+		},
 	},
 	{ // Int32 Bitwise Or
 		Pat: "|O",
 		Op:  0x1a,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			or := I32tob(Btoi32(memory[sPt:sPt+4]) | Btoi32(memory[sPt+4:sPt+8]))
+			memory[sPt+4] = or[0]
+			memory[sPt+5] = or[1]
+			memory[sPt+6] = or[2]
+			memory[sPt+7] = or[3]
+			return 1, 4
+		},
 	},
 	{ // Int64 Bitwise Or
 		Pat: "|",
 		Op:  0x1b,
+		Fn: func(memory []byte, ePt, sPt int) (ePtDelta, sPtDelta int) {
+			or := I64tob(Btoi64(memory[sPt:sPt+8]) | Btoi64(memory[sPt+8:sPt+16]))
+			memory[sPt+8] = or[0]
+			memory[sPt+9] = or[1]
+			memory[sPt+10] = or[2]
+			memory[sPt+11] = or[3]
+			memory[sPt+12] = or[4]
+			memory[sPt+13] = or[5]
+			memory[sPt+14] = or[6]
+			memory[sPt+15] = or[7]
+			return 1, 8
+		},
 	},
 	{ // Bitwise And
 		Pat: "&.",

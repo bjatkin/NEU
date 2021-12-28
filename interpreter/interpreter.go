@@ -27,9 +27,15 @@ func (i *Interp) Run() error {
 		return nil
 	}
 	op := i.Memory[i.ExePointer]
+	if core.OpCodes[op].Fn == nil {
+		fmt.Printf("unimplmented op code %s\n", core.OpCodes[op].Pat)
+	}
 	deltaEPtr, deltaSPtr := core.OpCodes[op].Fn(i.Memory[:], i.ExePointer, i.StackPointer)
 	i.ExePointer += deltaEPtr
 	i.StackPointer += deltaSPtr
+	// NOTE: this stuff isn't really adding any security since the pop command can write to any address
+	// we need to rethink this, but i'm taking it out for now
+	//
 	// if i.ExePointer < i.ReadOnlyOffset {
 	// 	return errors.New(fmt.Sprintf("invalid execution pointer %d, read only region starts at %d", i.ExePointer, i.ReadOnlyOffset))
 	// }

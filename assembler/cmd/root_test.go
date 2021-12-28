@@ -84,6 +84,12 @@ func Test_assemble(t *testing.T) {
 			true,
 		},
 		{
+			"undefined labeled",
+			"< [Test_Label]",
+			nil,
+			true,
+		},
+		{
 			"valid code",
 			`<.    0x5
 <.   0x15
@@ -120,6 +126,28 @@ func Test_assemble(t *testing.T) {
 				0x03, 0x13, 0x3c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 				//>
 				0x17,
+			},
+			false,
+		},
+		{
+			"valid code with labels",
+			`[Loop]
+<. 0x05
+<. 0x20
++.
+<. 0xff
+[Inner_Loop]
+	--.
+< [Inner_Loop]
+?>.
+< [Loop]
+|>`,
+			//     <.    x10   <.    x20   +.    <.    xff
+			[]byte{0x10, 0x05, 0x10, 0x20, 0x00, 0x10, 0xff,
+				//--. <     [INNER_LOOP](2)   (3)   (4)   (5)   (6)   (7)   ?>.
+				0x3d, 0x13, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2c,
+				//<   [LOOP](1)   (2)   (3)   (4)   (5)   (6)   (7)   |>
+				0x13, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34,
 			},
 			false,
 		},
