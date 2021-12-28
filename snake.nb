@@ -1,0 +1,68 @@
+\[]     = 0x0000 // the start of the screen buffer
+\~>_Len = 0x30fe // the length of the snake (2 bytes)
+\~>_Pos = 0x3100 // the array of snake positions
+\i      = 0x4100 // counter for loops (2 bytes)
+\tmp    = 0x4102 // tmp to pop temporary stuff off the stack (8 bytes)
+
+// for drawing pixels (these can be ored together)
+\[3---] = 0b11000000
+\[-3--] = 0b00110000
+\[--3-] = 0b00001100
+\[---3] = 0b00000011
+
+\[2---] = 0b10000000
+\[-2--] = 0b00100000
+\[--2-] = 0b00001000
+\[---2] = 0b00000010
+
+\[1---] = 0b01000000
+\[-1--] = 0b00010000
+\[--1-] = 0b00000100
+\[---1] = 0b00000001
+
+[Init]
+  // set the initial length of ~>
+  <o  4
+  <   \~>_Len
+  >o
+
+  // loop to set the initial (x, y) of ~>_Pos
+  <o  4
+  <0o
+  <   \i
+  >o
+  [Loop_~>_Fill]
+    <o  1
+    +o
+    <   [Loop_~>_Fill_Done]
+    ?>o
+    <   \tmp
+    >
+
+    // do the fill
+    <.  32   
+    <o  #\i
+    <   \tmp
+    >.
+    +.     // the y value
+    <.  32 // the x value
+
+    <   \~>_Pos
+    <0o
+    <0O
+    <o  #\i
+    <   2
+    *
+    +   // the x offset
+    <   \tmp 
+    >   // store the offset for later use
+    <   #\tmp
+    >   // write the x value to the array
+
+    <   #\tmp
+    ++
+    >   // write the y value to the array
+    <  [Loop_~>_Fill]
+    |>
+
+  [Loop_~>_Fill_Done]
