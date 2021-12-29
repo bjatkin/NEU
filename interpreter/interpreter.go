@@ -12,22 +12,25 @@ const (
 )
 
 type Interp struct {
-	Memory       [8 * 1024]byte // main memory
-	Code         []byte         // the code to execute
-	StackPointer int
-	ZeroStack    int
-	ExePointer   int
+	Memory         [8 * 1024]byte // main memory
+	StackPointer   uint
+	ExePointer     uint
+	ReadOnlyOffset uint
 }
 
 func (i *Interp) Run() error {
 	// TODO: this should probably be done in a for/while loop
 	// TODO: should I have a done code or just when execution
 	// gets to the end of the code?
-	if i.ExePointer >= len(i.Memory) {
+	if int(i.ExePointer) >= len(i.Memory) {
 		// execution is finished
 		return nil
 	}
-	op := i.Code[i.ExePointer]
+	if i.ExePointer < i.ReadOnlyOffset {
+		return errors.New(fmt.Sprintf("the execution pointer is invalid ePt: %d, readOnlyOffset: %d", i.ExePointer, i.ReadOnlyOffset))
+	}
+
+	op := i.Memory[i.ExePointer]
 	if core.OpCodes[op].Fn == nil {
 		fmt.Printf("uknown byte code 0x%x\n", op)
 	}
@@ -36,10 +39,8 @@ func (i *Interp) Run() error {
 	fmt.Printf("stack: 0x%x, [0x%x]\n", i.Memory[i.StackPointer], i.StackPointer)
 	fmt.Printf("#i: 0x%x\n", i.Memory[0x410])
 
-	deltaEPtr, deltaSPtr := core.OpCodes[op].Fn(i.Memory[:], i.Code, i.ExePointer, i.StackPointer)
-	i.ExePointer += deltaEPtr
-	i.StackPointer += deltaSPtr
-	if i.StackPointer > len(i.Memory) {
+	i.StackPointer, i.ExePointer = core.OpCodes[op].Fn(i.Memory[:i.ReadOnlyOffset], i.Memory[i.ReadOnlyOffset:], i.StackPointer, i.ExePointer)
+	if int(i.StackPointer) > int(i.ReadOnlyOffset) {
 		return errors.New(fmt.Sprintf("stack size is less than zero sPt: 0x%x, memorySize: 0x%x", i.StackPointer, len(i.Memory)))
 	}
 
@@ -55,7 +56,13 @@ func (i *Interp) LoadCode(byteCode []byte) error {
 		return errors.New(fmt.Sprintf("byte code is %d bytes, max length is %d", len(byteCode), maxByteCodeLen))
 	}
 
-	i.Code = byteCode
-	i.StackPointer = len(i.Memory)
+	offset := uint(len(byteCode) - len(i.Memory))
+	for c := 0; c < len(byteCode); c++ {
+		i.Memory[int(offset)+c] = byteCode[c]
+	}
+
+	i.StackPointer = offset
+	i.ExePointer = offset
+	i.ReadOnlyOffset = offset
 	return nil
 }
