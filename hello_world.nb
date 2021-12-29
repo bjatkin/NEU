@@ -1,0 +1,58 @@
+\[]     = 0x000 // the start of the screen buffer (ends at 0x400)
+\>Addr  = 0x410 // storage for holding return addresses (8 bytes)
+\tmp    = 0x419 // place to pop things tmp things off the stack (8 bytes)
+
+// for drawing pixels (these can be ored together)
+\[3---] = 0b11000000
+\[-3--] = 0b00110000
+\[--3-] = 0b00001100
+\[---3] = 0b00000011
+
+\[2---] = 0b10000000
+\[-2--] = 0b00100000
+\[--2-] = 0b00001000
+\[---2] = 0b00000010
+
+\[1---] = 0b01000000
+\[-1--] = 0b00010000
+\[--1-] = 0b00000100
+\[---1] = 0b00000001
+
+// an implementation of Bresenham's line algorithm
+[Ham-]
+  <.  -10
+  <   [Ham-Abs.Done]
+  <   [Abs.]
+  |>
+
+  <   \debug
+  >.
+
+  [Ham-Abs.Done]
+
+  // finish execution
+  <   [Fin]
+  |>
+
+// abs for a byte
+[Abs.]
+  <   \>Addr // store the return address so we can jump back to the caller
+  >
+  <   \tmp   // pop n off so we have a copy
+  >.
+
+  <.  #\tmp
+  <   [Abs.>]
+  <.  0
+  <.  #\tmp
+  ?>
+
+  // n is < 0 so invert it
+  <.  -1    
+  *.
+  
+  [Abs.>]
+  <   #\>Addr
+  |>
+
+[Fin]

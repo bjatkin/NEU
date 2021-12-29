@@ -17,13 +17,14 @@
 \[--1-] = 0b00000100
 \[---1] = 0b00000001
 
-[Init]
+[Draw]
   //  check for the loop end
   <   [End]
   <   #\i
   <   2
   ?<
 
+  //  or together the 3 colors into a single byte
   <.  \[3---]
   <.  \[-2--]
   <.  \[--1-]
@@ -48,7 +49,7 @@
   >
 
   // loop
-  <   [Init]
+  <   [Draw]
   |>
 
 [End]

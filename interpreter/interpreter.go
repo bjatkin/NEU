@@ -35,6 +35,7 @@ func (i *Interp) Run() error {
 		}
 	}
 
+	// print to debug bytes to see if stuff is working as expected
 	// reset execution to run again on the next update loop
 	i.ExePointer = 0
 	return nil
