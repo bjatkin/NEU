@@ -18,34 +18,37 @@
 \[---1] = 0b00000001
 
 [Init]
+  //  check for the loop end
+  <   [End]
+  <   #\i
+  <   2
+  ?<
+
+  <.  \[3---]
+  <.  \[-2--]
+  <.  \[--1-]
+  |.
+  |.
+
+  <   \[]
+  <   16
+  <   30
+  <   #\i
+  +   // 30 + i
+  *   // col count times width
+  <   7
+  +   // add col offset
+  +   // add to screen address
+  >.
+
   // update i
   <   #\i
   ++
   <   \i
   >
 
-  //  check for the loop end
-  <   [End]
-  <   #\i
-  <   8
-  ?>
+  // loop
+  <   [Init]
+  |>
 
-//  <.  \[3---]
-//  <.  \[-2--]
-//  |.
-//  <.  \[--1-]
-//  |.
-//  <   \[]
-//  <   16
-//  <   30
-//  *
-//  <   7
-//  <   #\i
-//  +   // 7 + i
-//  +   // add to col offset
-//  +   // add to screen address
-//  >.
-
-< 5
 [End]
-<0.
