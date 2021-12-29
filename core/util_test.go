@@ -5,10 +5,11 @@ import (
 )
 
 func TestI64tob(t *testing.T) {
-	tests := []uint{
-		50,
+	tests := []int{
 		1029384,
-		0xffffffffffffffff,
+		-50,
+		0x7fffffffffffffff,
+		-0x7fffffffffffffff,
 		0,
 	}
 
@@ -20,10 +21,11 @@ func TestI64tob(t *testing.T) {
 }
 
 func TestI32tob(t *testing.T) {
-	tests := []uint32{
-		2837,
+	tests := []int32{
 		102984,
-		0xffffffff,
+		-2837,
+		0x7fffffff,
+		-0x7fffffff,
 		0,
 	}
 
@@ -35,10 +37,11 @@ func TestI32tob(t *testing.T) {
 }
 
 func TestI16tob(t *testing.T) {
-	tests := []uint16{
-		2837,
+	tests := []int16{
 		10293,
-		0xffff,
+		-2837,
+		0x7fff,
+		-0x7fff,
 		0,
 	}
 
@@ -199,5 +202,101 @@ func TestIsAddrCMD(t *testing.T) {
 				t.Errorf("IsAddrCMD| got %v but wanted %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestAsi64(t *testing.T) {
+	tests := []int{
+		10,
+		-10,
+		0x7fffffffffffffff,
+		-0x7fffffffffffffff,
+		0,
+	}
+
+	for _, tt := range tests {
+		b := I64asb(&tt)
+		if got := Asi64(&b[0]); *got != tt {
+			t.Errorf("TestAsiI64| got %d but wanted %d", got, tt)
+		}
+	}
+}
+
+func TestAsi32(t *testing.T) {
+	tests := []int32{
+		10,
+		-10,
+		0x7fffffff,
+		-0x7fffffff,
+		0,
+	}
+
+	for _, tt := range tests {
+		b := I32asb(&tt)
+		if got := Asi32(&b[0]); *got != tt {
+			t.Errorf("TestAsi32| got %d but wanted %d", got, tt)
+		}
+	}
+}
+
+func TestAsi16(t *testing.T) {
+	tests := []int16{
+		10,
+		-10,
+		0x7fff,
+		-0x7fff,
+		0,
+	}
+
+	for _, tt := range tests {
+		b := I16asb(&tt)
+		if got := Asi16(&b[0]); *got != tt {
+			t.Errorf("TestAsi16| got %d but wanted %d", got, tt)
+		}
+	}
+}
+
+func TestAsu64(t *testing.T) {
+	tests := []uint{
+		10,
+		0xffffffffffffffff,
+		0,
+	}
+
+	for _, tt := range tests {
+		b := U64asb(&tt)
+		if got := Asu64(&b[0]); *got != tt {
+			t.Errorf("TestAsu64| got %d but wanted %d", got, tt)
+		}
+	}
+}
+
+func TestAsu32(t *testing.T) {
+	tests := []uint32{
+		10,
+		0xffffffff,
+		0,
+	}
+
+	for _, tt := range tests {
+		b := U32asb(&tt)
+		if got := Asu32(&b[0]); *got != tt {
+			t.Errorf("TestAsu32| got %d but wanted %d", got, tt)
+		}
+	}
+}
+
+func TestAsu16(t *testing.T) {
+	tests := []uint16{
+		10,
+		0xffff,
+		0,
+	}
+
+	for _, tt := range tests {
+		b := U16asb(&tt)
+		if got := Asu16(&b[0]); *got != tt {
+			t.Errorf("TestAsu16| got %d but wanted %d", got, tt)
+		}
 	}
 }
