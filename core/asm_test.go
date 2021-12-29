@@ -30,10 +30,10 @@ type opCodeTest struct {
 	name           string
 	memory         []byte
 	readOnlyOffset uint
-	ePt            uint
 	sPt            uint
-	wantEPt        uint
+	ePt            uint
 	wantSPt        uint
+	wantEPt        uint
 	wantMemory     []byte
 }
 
@@ -51,12 +51,12 @@ func TestOpCodeFns(t *testing.T) {
 			if OpCodes[opCode].Fn == nil {
 				t.Fatalf("%s[0x%x]| op code function not implemented yet", OpCodes[opCode].Pat, opCode)
 			}
-			newEPt, newSPt := OpCodes[opCode].Fn(tt.memory[:tt.readOnlyOffset], tt.memory[tt.readOnlyOffset:], tt.ePt, tt.sPt)
-			if newEPt != tt.wantEPt {
-				t.Errorf("%s[0x%x]| ePt was wrong, got: %d, want: %d", OpCodes[opCode].Pat, opCode, newEPt, tt.wantEPt)
-			}
+			newSPt, newEPt := OpCodes[opCode].Fn(tt.memory[:tt.readOnlyOffset], tt.memory[tt.readOnlyOffset:], tt.sPt, tt.ePt)
 			if newSPt != tt.wantSPt {
 				t.Errorf("%s[0x%x]| sPt was wrong, got: %d, want: %d", OpCodes[opCode].Pat, opCode, newSPt, tt.wantSPt)
+			}
+			if newEPt != tt.wantEPt {
+				t.Errorf("%s[0x%x]| ePt was wrong, got: %d, want: %d", OpCodes[opCode].Pat, opCode, newEPt, tt.wantEPt)
 			}
 			if !reflect.DeepEqual(tt.memory, tt.wantMemory) {
 				t.Errorf("%s[0x%x]| memory change was wrong,\ngot:  %v,\nwant: %v", OpCodes[opCode].Pat, opCode, tt.memory, tt.wantMemory)
@@ -71,293 +71,322 @@ var opCodeFnTests = []opCodeTest{
 		name:           "byte add",
 		memory:         []byte{2, 3, 0x00},
 		readOnlyOffset: 2,
-		ePt:            0,
 		sPt:            0,
-		wantEPt:        1,
+		ePt:            0,
 		wantSPt:        1,
+		wantEPt:        1,
 		wantMemory:     []byte{2, 5, 0x00}, // 2 is not overwritten
 	},
 	{
 		name:           "overflow byte add",
 		memory:         []byte{0xff, 5, 0x00},
 		readOnlyOffset: 2,
-		ePt:            0,
 		sPt:            0,
-		wantEPt:        1,
+		ePt:            0,
 		wantSPt:        1,
+		wantEPt:        1,
 		wantMemory:     []byte{0xff, 4, 0x00}, // 0xff is not overwritten
 	},
 	{
 		name:           "int16 add",
 		memory:         []byte{50, 0, 100, 0, 0x01},
 		readOnlyOffset: 4,
+		sPt:            0,
+		ePt:            0,
+		wantSPt:        2,
+		wantEPt:        1,
+		wantMemory:     []byte{50, 0, 150, 0, 0x01}, // 50 is not overwritten
+	},
+	{
+		name:           "overflow int16 add",
+		memory:         []byte{0xff, 0xff, 5, 0, 0x01},
+		readOnlyOffset: 4,
+		sPt:            0,
+		ePt:            0,
+		wantSPt:        2,
+		wantEPt:        1,
+		wantMemory:     []byte{0xff, 0xff, 4, 0, 0x01}, // 0xffff is not overwritten
+	},
+	{
+		name:           "int32 add",
+		memory:         []byte{50, 0, 0, 0, 100, 0, 0, 0, 0x02},
+		readOnlyOffset: 8,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        4,
+		wantMemory:     []byte{50, 0, 0, 0, 150, 0, 0, 0, 0x02}, // 50 is not overwritten
+	},
+	{
+		name:           "overflow int32 add",
+		memory:         []byte{0xff, 0xff, 0xff, 0xff, 5, 0, 0, 0, 0x02},
+		readOnlyOffset: 8,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        4,
+		wantMemory:     []byte{0xff, 0xff, 0xff, 0xff, 4, 0, 0, 0, 0x02},
+	},
+	{
+		name:           "int64 add",
+		memory:         []byte{50, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0x03},
+		readOnlyOffset: 16,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        8,
+		wantMemory:     []byte{50, 0, 0, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 0, 0x03}, // 50 is not overwritten
+	},
+	{
+		name:           "overflow int64 add",
+		memory:         []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 5, 0, 0, 0, 0, 0, 0, 0, 0x03},
+		readOnlyOffset: 16,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        8,
+		wantMemory:     []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 4, 0, 0, 0, 0, 0, 0, 0, 0x03}, // 0xffffffffffffffff is not overwritten
+	},
+	{
+		name:           "subtract byte",
+		memory:         []byte{3, 2, 0x04},
+		readOnlyOffset: 2,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        1,
+		wantMemory:     []byte{3, 1, 0x04}, // 3 is not overwritten
+	},
+	{
+		name:           "underflow subtract byte",
+		memory:         []byte{0, 9, 0x04},
+		readOnlyOffset: 2,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        1,
+		wantMemory:     []byte{0, 0xf7, 0x04}, // 0 is not overwritten
+	},
+	{
+		name:           "subtract int16",
+		memory:         []byte{50, 0, 20, 0, 0x05},
+		readOnlyOffset: 4,
 		ePt:            0,
 		sPt:            0,
 		wantEPt:        1,
 		wantSPt:        2,
-		wantMemory:     []byte{50, 0, 150, 0, 0x01}, // 50 is not overwritten
+		wantMemory:     []byte{50, 0, 30, 0, 0x05}, // 50 is not overwritten
 	},
-	// {
-	// 	name:       "overflow int16 add",
-	// 	memory:     []byte{0xff, 0xff, 5, 0, 0x01},
-	// 	ePt:        4,
-	// 	sPt:        0,
-	// 	wantEPt:    5,
-	// 	wantSPt:    2,
-	// 	wantMemory: []byte{0xff, 0xff, 4, 0, 0x01}, // 0xffff is not overwritten
-	// },
-	// {
-	// 	name:       "int32 add",
-	// 	memory:     []byte{50, 0, 0, 0, 100, 0, 0, 0, 0x02},
-	// 	ePt:        8,
-	// 	sPt:        0,
-	// 	wantEPt:    9,
-	// 	wantSPt:    4,
-	// 	wantMemory: []byte{50, 0, 0, 0, 150, 0, 0, 0, 0x02}, // 50 is not overwritten
-	// },
-	// {
-	// 	name:       "overflow int32 add",
-	// 	memory:     []byte{0xff, 0xff, 0xff, 0xff, 5, 0, 0, 0, 0x02},
-	// 	ePt:        8,
-	// 	sPt:        0,
-	// 	wantEPt:    9,
-	// 	wantSPt:    4,
-	// 	wantMemory: []byte{0xff, 0xff, 0xff, 0xff, 4, 0, 0, 0, 0x02},
-	// },
-	// {
-	// 	name:       "int64 add",
-	// 	memory:     []byte{50, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0x03},
-	// 	ePt:        16,
-	// 	sPt:        0,
-	// 	wantEPt:    17,
-	// 	wantSPt:    8,
-	// 	wantMemory: []byte{50, 0, 0, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 0, 0x03}, // 50 is not overwritten
-	// },
-	// {
-	// 	name:       "overflow int64 add",
-	// 	memory:     []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 5, 0, 0, 0, 0, 0, 0, 0, 0x03},
-	// 	ePt:        16,
-	// 	sPt:        0,
-	// 	wantEPt:    17,
-	// 	wantSPt:    8,
-	// 	wantMemory: []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 4, 0, 0, 0, 0, 0, 0, 0, 0x03}, // 0xffffffffffffffff is not overwritten
-	// },
-	// {
-	// 	name:       "subtract byte",
-	// 	memory:     []byte{3, 2, 0x04},
-	// 	ePt:        2,
-	// 	sPt:        0,
-	// 	wantEPt:    3,
-	// 	wantSPt:    1,
-	// 	wantMemory: []byte{3, 1, 0x04}, // 3 is not overwritten
-	// },
-	// {
-	// 	name:       "underflow subtract byte",
-	// 	memory:     []byte{0, 9, 0x04},
-	// 	ePt:        2,
-	// 	sPt:        0,
-	// 	wantEPt:    3,
-	// 	wantSPt:    1,
-	// 	wantMemory: []byte{0, 0xf7, 0x04}, // 0 is not overwritten
-	// },
-	// {
-	// 	name:       "subtract int16",
-	// 	memory:     []byte{50, 0, 20, 0, 0x05},
-	// 	ePt:        4,
-	// 	sPt:        0,
-	// 	wantEPt:    5,
-	// 	wantSPt:    2,
-	// 	wantMemory: []byte{50, 0, 30, 0, 0x05}, // 50 is not overwritten
-	// },
-	// {
-	// 	name:       "underflow subtract int16",
-	// 	memory:     []byte{0, 0, 9, 0, 0x05},
-	// 	ePt:        4,
-	// 	sPt:        0,
-	// 	wantEPt:    5,
-	// 	wantSPt:    2,
-	// 	wantMemory: []byte{0, 0, 0xf7, 0xff, 0x05},
-	// },
-	// {
-	// 	name:       "subtract int32",
-	// 	memory:     []byte{50, 0, 0, 0, 20, 0, 0, 0, 0x06},
-	// 	ePt:        8,
-	// 	sPt:        0,
-	// 	wantEPt:    9,
-	// 	wantSPt:    4,
-	// 	wantMemory: []byte{50, 0, 0, 0, 30, 0, 0, 0, 0x06}, // 50 is not overwritten
-	// },
-	// {
-	// 	name:       "underflow subtract int32",
-	// 	memory:     []byte{0, 0, 0, 0, 9, 0, 0, 0, 0x06},
-	// 	ePt:        8,
-	// 	sPt:        0,
-	// 	wantEPt:    9,
-	// 	wantSPt:    4,
-	// 	wantMemory: []byte{0, 0, 0, 0, 0xf7, 0xff, 0xff, 0xff, 0x06},
-	// },
-	// {
-	// 	name:       "subtract int64",
-	// 	memory:     []byte{50, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0x07},
-	// 	ePt:        16,
-	// 	sPt:        0,
-	// 	wantEPt:    17,
-	// 	wantSPt:    8,
-	// 	wantMemory: []byte{50, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0x07}, // 50 is not overwritten
-	// },
-	// {
-	// 	name:       "underflow subtract int64",
-	// 	memory:     []byte{0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0x07},
-	// 	ePt:        16,
-	// 	sPt:        0,
-	// 	wantEPt:    17,
-	// 	wantSPt:    8,
-	// 	wantMemory: []byte{0, 0, 0, 0, 0, 0, 0, 0, 0xf7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07},
-	// },
-	// {
-	// 	name:       "multiply byte",
-	// 	memory:     []byte{3, 2, 0x08},
-	// 	ePt:        2,
-	// 	sPt:        0,
-	// 	wantEPt:    3,
-	// 	wantSPt:    1,
-	// 	wantMemory: []byte{3, 6, 0x08}, // 3 is not overwritten
-	// },
-	// {
-	// 	name:       "overflow multiply byte",
-	// 	memory:     []byte{2, 0xff, 0x08},
-	// 	ePt:        2,
-	// 	sPt:        0,
-	// 	wantEPt:    3,
-	// 	wantSPt:    1,
-	// 	wantMemory: []byte{2, 0xfe, 0x08}, // 2 is not overwritten
-	// },
-	// {
-	// 	name:       "multiply int16",
-	// 	memory:     []byte{10, 0, 5, 0, 0x09},
-	// 	ePt:        4,
-	// 	sPt:        0,
-	// 	wantEPt:    5,
-	// 	wantSPt:    2,
-	// 	wantMemory: []byte{10, 0, 50, 0, 0x09}, // 10 is not overwritten
-	// },
-	// {
-	// 	name:       "overflow multiply int16",
-	// 	memory:     []byte{0xff, 0xff, 2, 0, 0x09},
-	// 	ePt:        4,
-	// 	sPt:        0,
-	// 	wantEPt:    5,
-	// 	wantSPt:    2,
-	// 	wantMemory: []byte{0xff, 0xff, 0xfe, 0xff, 0x09}, // 0xffff is not overwritten
-	// },
-	// {
-	// 	name:       "multiply 32",
-	// 	memory:     []byte{10, 0, 0, 0, 5, 0, 0, 0, 0x0a},
-	// 	ePt:        8,
-	// 	sPt:        0,
-	// 	wantEPt:    9,
-	// 	wantSPt:    4,
-	// 	wantMemory: []byte{10, 0, 0, 0, 50, 0, 0, 0, 0x0a}, // 50 is not overwritten
-	// },
-	// {
-	// 	name:       "overflow multiply 32",
-	// 	memory:     []byte{0xff, 0xff, 0xff, 0xff, 2, 0, 0, 0, 0x0a},
-	// 	ePt:        8,
-	// 	sPt:        0,
-	// 	wantEPt:    9,
-	// 	wantSPt:    4,
-	// 	wantMemory: []byte{0xff, 0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0x0a}, // 0xffffffff is not overwritten
-	// },
-	// {
-	// 	name:       "multiply int64",
-	// 	memory:     []byte{10, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0x0b},
-	// 	ePt:        16,
-	// 	sPt:        0,
-	// 	wantEPt:    17,
-	// 	wantSPt:    8,
-	// 	wantMemory: []byte{10, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0x0b}, // 10 is not overwritten
-	// },
-	// {
-	// 	name:       "overflow multiply int64",
-	// 	memory:     []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0x0b},
-	// 	ePt:        16,
-	// 	sPt:        0,
-	// 	wantEPt:    17,
-	// 	wantSPt:    8,
-	// 	wantMemory: []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0b}, // 0xffffffffffffffff is not overwritten
-	// },
-	// {
-	// 	name:       "byte divide",
-	// 	memory:     []byte{10, 2, 0x0c},
-	// 	ePt:        2,
-	// 	sPt:        0,
-	// 	wantEPt:    3,
-	// 	wantSPt:    1,
-	// 	wantMemory: []byte{10, 5, 0x0c}, // 10 is not overwritten
-	// },
-	// {
-	// 	name:       "uneven byte divide",
-	// 	memory:     []byte{3, 2, 0x0c},
-	// 	ePt:        2,
-	// 	sPt:        0,
-	// 	wantEPt:    3,
-	// 	wantSPt:    1,
-	// 	wantMemory: []byte{3, 1, 0x0c}, // 3 is not overwritten
-	// },
-	// {
-	// 	name:       "int16 divide",
-	// 	memory:     []byte{100, 0, 5, 0, 0x0d},
-	// 	ePt:        4,
-	// 	sPt:        0,
-	// 	wantEPt:    5,
-	// 	wantSPt:    2,
-	// 	wantMemory: []byte{100, 0, 20, 0, 0x0d},
-	// },
-	// {
-	// 	name:       "uneven int16 divide",
-	// 	memory:     []byte{100, 0, 3, 0, 0x0d},
-	// 	ePt:        4,
-	// 	sPt:        0,
-	// 	wantEPt:    5,
-	// 	wantSPt:    2,
-	// 	wantMemory: []byte{100, 0, 33, 0, 0x0d}, // 100 is not overwritten
-	// },
-	// {
-	// 	name:       "int32 divide",
-	// 	memory:     []byte{100, 0, 0, 0, 5, 0, 0, 0, 0x0e},
-	// 	ePt:        8,
-	// 	sPt:        0,
-	// 	wantEPt:    9,
-	// 	wantSPt:    4,
-	// 	wantMemory: []byte{100, 0, 0, 0, 20, 0, 0, 0, 0x0e}, // 100 is not overwritten
-	// },
-	// {
-	// 	name:       "uneven int32 divide",
-	// 	memory:     []byte{100, 0, 0, 0, 3, 0, 0, 0, 0x0e},
-	// 	ePt:        8,
-	// 	sPt:        0,
-	// 	wantEPt:    9,
-	// 	wantSPt:    4,
-	// 	wantMemory: []byte{100, 0, 0, 0, 33, 0, 0, 0, 0x0e}, // 100 is not overwritten
-	// },
-	// {
-	// 	name:       "int64 divide",
-	// 	memory:     []byte{100, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0x0f},
-	// 	ePt:        16,
-	// 	sPt:        0,
-	// 	wantEPt:    17,
-	// 	wantSPt:    8,
-	// 	wantMemory: []byte{100, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0x0f}, // 100 is not overwritten
-	// },
-	// {
-	// 	name:       "uneven int64 divide",
-	// 	memory:     []byte{100, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0x0f},
-	// 	ePt:        16,
-	// 	sPt:        0,
-	// 	wantEPt:    17,
-	// 	wantSPt:    8,
-	// 	wantMemory: []byte{100, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0x0f}, // 100 is not overwritten
-	// },
+	{
+		name:           "underflow subtract int16",
+		memory:         []byte{0, 0, 9, 0, 0x05},
+		readOnlyOffset: 4,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        2,
+		wantMemory:     []byte{0, 0, 0xf7, 0xff, 0x05},
+	},
+	{
+		name:           "subtract int32",
+		memory:         []byte{50, 0, 0, 0, 20, 0, 0, 0, 0x06},
+		readOnlyOffset: 8,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        4,
+		wantMemory:     []byte{50, 0, 0, 0, 30, 0, 0, 0, 0x06}, // 50 is not overwritten
+	},
+	{
+		name:           "underflow subtract int32",
+		memory:         []byte{0, 0, 0, 0, 9, 0, 0, 0, 0x06},
+		readOnlyOffset: 8,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        4,
+		wantMemory:     []byte{0, 0, 0, 0, 0xf7, 0xff, 0xff, 0xff, 0x06},
+	},
+	{
+		name:           "subtract int64",
+		memory:         []byte{50, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0x07},
+		readOnlyOffset: 16,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        8,
+		wantMemory:     []byte{50, 0, 0, 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0x07}, // 50 is not overwritten
+	},
+	{
+		name:           "underflow subtract int64",
+		memory:         []byte{0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0x07},
+		readOnlyOffset: 16,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        8,
+		wantMemory:     []byte{0, 0, 0, 0, 0, 0, 0, 0, 0xf7, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07},
+	},
+	{
+		name:           "multiply byte",
+		memory:         []byte{3, 2, 0x08},
+		readOnlyOffset: 2,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        1,
+		wantMemory:     []byte{3, 6, 0x08}, // 3 is not overwritten
+	},
+	{
+		name:           "overflow multiply byte",
+		memory:         []byte{2, 0xff, 0x08},
+		readOnlyOffset: 2,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        1,
+		wantMemory:     []byte{2, 0xfe, 0x08}, // 2 is not overwritten
+	},
+	{
+		name:           "multiply int16",
+		memory:         []byte{10, 0, 5, 0, 0x09},
+		readOnlyOffset: 4,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        2,
+		wantMemory:     []byte{10, 0, 50, 0, 0x09}, // 10 is not overwritten
+	},
+	{
+		name:           "overflow multiply int16",
+		memory:         []byte{0xff, 0xff, 2, 0, 0x09},
+		readOnlyOffset: 4,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        2,
+		wantMemory:     []byte{0xff, 0xff, 0xfe, 0xff, 0x09}, // 0xffff is not overwritten
+	},
+	{
+		name:           "multiply 32",
+		memory:         []byte{10, 0, 0, 0, 5, 0, 0, 0, 0x0a},
+		readOnlyOffset: 8,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        4,
+		wantMemory:     []byte{10, 0, 0, 0, 50, 0, 0, 0, 0x0a}, // 50 is not overwritten
+	},
+	{
+		name:           "overflow multiply 32",
+		memory:         []byte{0xff, 0xff, 0xff, 0xff, 2, 0, 0, 0, 0x0a},
+		readOnlyOffset: 8,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        4,
+		wantMemory:     []byte{0xff, 0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0x0a}, // 0xffffffff is not overwritten
+	},
+	{
+		name:           "multiply int64",
+		memory:         []byte{10, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0x0b},
+		readOnlyOffset: 16,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        8,
+		wantMemory:     []byte{10, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0x0b}, // 10 is not overwritten
+	},
+	{
+		name:           "overflow multiply int64",
+		memory:         []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0x0b},
+		readOnlyOffset: 16,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        8,
+		wantMemory:     []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0b}, // 0xffffffffffffffff is not overwritten
+	},
+	{
+		name:           "byte divide",
+		memory:         []byte{10, 2, 0x0c},
+		readOnlyOffset: 2,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        1,
+		wantMemory:     []byte{10, 5, 0x0c}, // 10 is not overwritten
+	},
+	{
+		name:           "uneven byte divide",
+		memory:         []byte{3, 2, 0x0c},
+		readOnlyOffset: 2,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        1,
+		wantMemory:     []byte{3, 1, 0x0c}, // 3 is not overwritten
+	},
+	{
+		name:           "int16 divide",
+		memory:         []byte{100, 0, 5, 0, 0x0d},
+		readOnlyOffset: 4,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        2,
+		wantMemory:     []byte{100, 0, 20, 0, 0x0d},
+	},
+	{
+		name:           "uneven int16 divide",
+		memory:         []byte{100, 0, 3, 0, 0x0d},
+		readOnlyOffset: 4,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        2,
+		wantMemory:     []byte{100, 0, 33, 0, 0x0d}, // 100 is not overwritten
+	},
+	{
+		name:           "int32 divide",
+		memory:         []byte{100, 0, 0, 0, 5, 0, 0, 0, 0x0e},
+		readOnlyOffset: 8,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        4,
+		wantMemory:     []byte{100, 0, 0, 0, 20, 0, 0, 0, 0x0e}, // 100 is not overwritten
+	},
+	{
+		name:           "uneven int32 divide",
+		memory:         []byte{100, 0, 0, 0, 3, 0, 0, 0, 0x0e},
+		readOnlyOffset: 8,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        4,
+		wantMemory:     []byte{100, 0, 0, 0, 33, 0, 0, 0, 0x0e}, // 100 is not overwritten
+	},
+	{
+		name:           "int64 divide",
+		memory:         []byte{100, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0x0f},
+		readOnlyOffset: 16,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        8,
+		wantMemory:     []byte{100, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0x0f}, // 100 is not overwritten
+	},
+	{
+		name:           "uneven int64 divide",
+		memory:         []byte{100, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0x0f},
+		readOnlyOffset: 16,
+		ePt:            0,
+		sPt:            0,
+		wantEPt:        1,
+		wantSPt:        8,
+		wantMemory:     []byte{100, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0x0f}, // 100 is not overwritten
+	},
 	// {
 	// 	name:       "byte push",
 	// 	memory:     []byte{0, 0x10, 5},
