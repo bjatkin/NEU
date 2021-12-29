@@ -142,3 +142,10 @@ func IsAddrCMD(test []string) bool {
 
 	return true
 }
+
+func ExpectArg(op byte) bool {
+	if OpCodes[op].ArgSize > 0 {
+		return true
+	}
+	return false
+}

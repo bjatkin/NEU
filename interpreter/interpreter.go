@@ -12,10 +12,11 @@ const (
 )
 
 type Interp struct {
-	Memory         [8 * 1024]byte // main memory
-	StackPointer   int
-	ExePointer     int
-	ReadOnlyOffset int
+	Memory       [8 * 1024]byte // main memory
+	Code         []byte         // the code to execute
+	StackPointer int
+	ZeroStack    int
+	ExePointer   int
 }
 
 func (i *Interp) Run() error {
@@ -26,25 +27,26 @@ func (i *Interp) Run() error {
 		// execution is finished
 		return nil
 	}
-	op := i.Memory[i.ExePointer]
+	op := i.Code[i.ExePointer]
 	if core.OpCodes[op].Fn == nil {
-		fmt.Printf("unimplmented op code %s\n", core.OpCodes[op].Pat)
+		fmt.Printf("uknown byte code 0x%x\n", op)
 	}
-	deltaEPtr, deltaSPtr := core.OpCodes[op].Fn(i.Memory[:], i.ExePointer, i.StackPointer)
+
+	fmt.Printf("do: %s\n", core.OpCodes[op].Pat)
+	fmt.Printf("stack: 0x%x, [0x%x]\n", i.Memory[i.StackPointer], i.StackPointer)
+	fmt.Printf("#i: 0x%x\n", i.Memory[0x410])
+
+	deltaEPtr, deltaSPtr := core.OpCodes[op].Fn(i.Memory[:], i.Code, i.ExePointer, i.StackPointer)
 	i.ExePointer += deltaEPtr
 	i.StackPointer += deltaSPtr
-	// NOTE: this stuff isn't really adding any security since the pop command can write to any address
-	// we need to rethink this, but i'm taking it out for now
-	//
-	// if i.ExePointer < i.ReadOnlyOffset {
-	// 	return errors.New(fmt.Sprintf("invalid execution pointer %d, read only region starts at %d", i.ExePointer, i.ReadOnlyOffset))
-	// }
-	// if i.StackPointer > i.ReadOnlyOffset {
-	// 	return errors.New(fmt.Sprintf("invalid stack pointer %d, read only region starts at %d", i.StackPointer, i.ReadOnlyOffset))
-	// }
-	fmt.Println("OP: ", core.OpCodes[op].Pat)
-	fmt.Println("EXEPT: ", i.ExePointer, "STACKPT: ", i.StackPointer)
-	fmt.Printf("MEM: ...%#v\n", i.Memory[8185:])
+	if i.StackPointer > len(i.Memory) {
+		return errors.New(fmt.Sprintf("stack size is less than zero sPt: 0x%x, memorySize: 0x%x", i.StackPointer, len(i.Memory)))
+	}
+
+	fmt.Printf("#i: 0x%x\n", i.Memory[0x410])
+	fmt.Printf("stack: 0x%x, [0x%x]\n", i.Memory[i.StackPointer], i.StackPointer)
+	fmt.Printf("do next: %s %x[%x]\n", core.OpCodes[i.Memory[i.ExePointer]].Pat, i.Memory[i.ExePointer], i.ExePointer)
+	fmt.Println("--------------------------------------")
 	return nil
 }
 
@@ -53,13 +55,7 @@ func (i *Interp) LoadCode(byteCode []byte) error {
 		return errors.New(fmt.Sprintf("byte code is %d bytes, max length is %d", len(byteCode), maxByteCodeLen))
 	}
 
-	offset := len(i.Memory) - len(byteCode)
-	for c := 0; c < len(byteCode); c++ {
-		i.Memory[offset+c] = byteCode[c]
-	}
-
-	i.ReadOnlyOffset = offset
-	i.StackPointer = offset
-	i.ExePointer = offset
+	i.Code = byteCode
+	i.StackPointer = len(i.Memory)
 	return nil
 }

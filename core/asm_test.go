@@ -29,17 +29,18 @@ func TestOpCodes(t *testing.T) {
 type opCodeTest struct {
 	name       string
 	memory     []byte
-	ePt        int
-	sPt        int
-	wantEPt    int
-	wantSPt    int
+	code       []byte
+	ePt        uint
+	sPt        uint
+	wantEPt    uint
+	wantSPt    uint
 	wantMemory []byte
 }
 
 func TestOpCodeFns(t *testing.T) {
 	for _, tt := range opCodeFnTests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.ePt >= len(tt.memory) {
+			if int(tt.ePt) >= len(tt.memory) {
 				t.Fatalf("execution pointer is out of range %d", tt.ePt)
 			}
 
@@ -50,12 +51,12 @@ func TestOpCodeFns(t *testing.T) {
 			if OpCodes[opCode].Fn == nil {
 				t.Fatalf("%s[0x%x]| op code function not implemented yet", OpCodes[opCode].Pat, opCode)
 			}
-			ePtDelta, sPtDelta := OpCodes[opCode].Fn(tt.memory, tt.ePt, tt.sPt)
-			if tt.ePt+ePtDelta != tt.wantEPt {
-				t.Errorf("%s[0x%x]| ePt was wrong, got: %d, want: %d", OpCodes[opCode].Pat, opCode, tt.ePt+ePtDelta, tt.wantEPt)
+			newEPt, newSPt := OpCodes[opCode].Fn(tt.memory, tt.code, tt.ePt, tt.sPt)
+			if newEPt != tt.wantEPt {
+				t.Errorf("%s[0x%x]| ePt was wrong, got: %d, want: %d", OpCodes[opCode].Pat, opCode, newEPt, tt.wantEPt)
 			}
-			if tt.sPt+sPtDelta != tt.wantSPt {
-				t.Errorf("%s[0x%x]| sPt was wrong, got: %d, want: %d", OpCodes[opCode].Pat, opCode, tt.sPt+sPtDelta, tt.wantSPt)
+			if newSPt != tt.wantSPt {
+				t.Errorf("%s[0x%x]| sPt was wrong, got: %d, want: %d", OpCodes[opCode].Pat, opCode, newSPt, tt.wantSPt)
 			}
 			if !reflect.DeepEqual(tt.memory, tt.wantMemory) {
 				t.Errorf("%s[0x%x]| memory change was wrong,\ngot:  %v,\nwant: %v", OpCodes[opCode].Pat, opCode, tt.memory, tt.wantMemory)
@@ -68,7 +69,8 @@ func TestOpCodeFns(t *testing.T) {
 var opCodeFnTests = []opCodeTest{
 	{
 		name:       "byte add",
-		memory:     []byte{2, 3, 0x00},
+		memory:     []byte{2, 3},
+		code:       []byte{0x00},
 		ePt:        2,
 		sPt:        0,
 		wantEPt:    3,
@@ -909,38 +911,38 @@ var opCodeFnTests = []opCodeTest{
 	},
 	{
 		name:       "byte push addr",
-		memory:     []byte{10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x45},
-		ePt:        10,
-		sPt:        2,
-		wantEPt:    11,
-		wantSPt:    1,
-		wantMemory: []byte{10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0x45},
+		memory:     []byte{5, 0x45, 1, 0, 0, 0, 0, 0, 0, 0},
+		ePt:        1,
+		sPt:        1,
+		wantEPt:    10,
+		wantSPt:    0,
+		wantMemory: []byte{0x45, 0x45, 1, 0, 0, 0, 0, 0, 0, 0},
 	},
 	{
 		name:       "int16 push addr",
-		memory:     []byte{10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x46},
-		ePt:        12,
-		sPt:        4,
-		wantEPt:    13,
-		wantSPt:    2,
-		wantMemory: []byte{10, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x46},
+		memory:     []byte{5, 0, 0x46, 2, 0, 0, 0, 0, 0, 0, 0},
+		ePt:        2,
+		sPt:        2,
+		wantEPt:    11,
+		wantSPt:    0,
+		wantMemory: []byte{0x46, 2, 0x46, 2, 0, 0, 0, 0, 0, 0, 0},
 	},
 	{
 		name:       "int32 push addr",
-		memory:     []byte{10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x47},
-		ePt:        16,
-		sPt:        8,
-		wantEPt:    17,
-		wantSPt:    4,
-		wantMemory: []byte{10, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x47},
+		memory:     []byte{5, 0, 0, 0, 0x47, 4, 0, 0, 0, 0, 0, 0, 0},
+		ePt:        4,
+		sPt:        4,
+		wantEPt:    13,
+		wantSPt:    0,
+		wantMemory: []byte{0x47, 4, 0, 0, 0x47, 4, 0, 0, 0, 0, 0, 0, 0},
 	},
 	{
-		name:       "int16 push addr",
-		memory:     []byte{10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x48},
-		ePt:        24,
-		sPt:        16,
-		wantEPt:    25,
-		wantSPt:    8,
-		wantMemory: []byte{10, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x48},
+		name:       "int64 push addr",
+		memory:     []byte{5, 0, 0, 0, 0, 0, 0, 0, 0x48, 8, 0, 0, 0, 0, 0, 0, 0},
+		ePt:        8,
+		sPt:        8,
+		wantEPt:    17,
+		wantSPt:    0,
+		wantMemory: []byte{0x48, 8, 0, 0, 0, 0, 0, 0, 0x48, 8, 0, 0, 0, 0, 0, 0, 0},
 	},
 }

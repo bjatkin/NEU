@@ -151,7 +151,9 @@ func assemble(code string) ([]byte, error) {
 
 			found = true
 			bin = append(bin, op.Op)
+			var argCount int
 			for _, arg := range expr[1:] {
+				argCount++
 				if core.IsLabel(arg) {
 					labelReplace[arg] = append(labelReplace[arg], len(bin))
 					bin = append(bin, core.I64tob(0)...)
@@ -163,6 +165,10 @@ func assemble(code string) ([]byte, error) {
 					return nil, errors.New(fmt.Sprintf("unable to parse expression '%s' %s", strings.Join(expr, " "), err))
 				}
 				bin = append(bin, b...)
+			}
+
+			if (argCount > 0) != core.ExpectArg(op.Op) {
+				return nil, errors.New(fmt.Sprintf("invalid expression '%s', op %s has invalid number of arguments", strings.Join(expr, " "), cmd))
 			}
 		}
 		if !found {

@@ -90,6 +90,18 @@ func Test_assemble(t *testing.T) {
 			true,
 		},
 		{
+			"unexpected args",
+			`< 0
+< 10
+?> [End]
+< 5
+< 5
++
+[End]`,
+			nil,
+			true,
+		},
+		{
 			"valid code",
 			`<.    0x5
 <.   0x15
