@@ -197,7 +197,7 @@ var OpCodes = [0xff]OpCode{
 		Op:      0x10,
 		ArgSize: 8,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			memory[sPt-1] = memory[ePt+1]
+			memory[sPt-1] = code[ePt+1]
 			return sPt - 1, ePt + 2
 		},
 	},
@@ -206,8 +206,8 @@ var OpCodes = [0xff]OpCode{
 		Op:      0x11,
 		ArgSize: 16,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			memory[sPt-2] = memory[ePt+1]
-			memory[sPt-1] = memory[ePt+2]
+			memory[sPt-2] = code[ePt+1]
+			memory[sPt-1] = code[ePt+2]
 			return sPt - 2, ePt + 3
 		},
 	},
@@ -216,10 +216,10 @@ var OpCodes = [0xff]OpCode{
 		Op:      0x12,
 		ArgSize: 32,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			memory[sPt-4] = memory[ePt+1]
-			memory[sPt-3] = memory[ePt+2]
-			memory[sPt-2] = memory[ePt+3]
-			memory[sPt-1] = memory[ePt+4]
+			memory[sPt-4] = code[ePt+1]
+			memory[sPt-3] = code[ePt+2]
+			memory[sPt-2] = code[ePt+3]
+			memory[sPt-1] = code[ePt+4]
 			return sPt - 4, ePt + 5
 		},
 	},
@@ -228,14 +228,14 @@ var OpCodes = [0xff]OpCode{
 		Op:      0x13,
 		ArgSize: 64,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			memory[sPt-8] = memory[ePt+1]
-			memory[sPt-7] = memory[ePt+2]
-			memory[sPt-6] = memory[ePt+3]
-			memory[sPt-5] = memory[ePt+4]
-			memory[sPt-4] = memory[ePt+5]
-			memory[sPt-3] = memory[ePt+6]
-			memory[sPt-2] = memory[ePt+7]
-			memory[sPt-1] = memory[ePt+8]
+			memory[sPt-8] = code[ePt+1]
+			memory[sPt-7] = code[ePt+2]
+			memory[sPt-6] = code[ePt+3]
+			memory[sPt-5] = code[ePt+4]
+			memory[sPt-4] = code[ePt+5]
+			memory[sPt-3] = code[ePt+6]
+			memory[sPt-2] = code[ePt+7]
+			memory[sPt-1] = code[ePt+8]
 			return sPt - 8, ePt + 9
 		},
 	},
@@ -791,7 +791,7 @@ var OpCodes = [0xff]OpCode{
 		Op:      0x45,
 		ArgSize: 64,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			addr := Btoi64(memory[ePt+1 : ePt+9])
+			addr := Btoi64(code[ePt+1 : ePt+9])
 			memory[sPt-1] = memory[addr]
 			return sPt - 1, ePt + 9
 		},
@@ -801,7 +801,7 @@ var OpCodes = [0xff]OpCode{
 		Op:      0x46,
 		ArgSize: 64,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			addr := Btoi64(memory[ePt+1 : ePt+9])
+			addr := Btoi64(code[ePt+1 : ePt+9])
 			memory[sPt-2] = memory[addr]
 			memory[sPt-1] = memory[addr+1]
 			return sPt - 2, ePt + 9
@@ -812,7 +812,7 @@ var OpCodes = [0xff]OpCode{
 		Op:      0x47,
 		ArgSize: 64,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			addr := Btoi64(memory[ePt+1 : sPt+9])
+			addr := Btoi64(code[ePt+1 : ePt+9])
 			memory[sPt-4] = memory[addr]
 			memory[sPt-3] = memory[addr+1]
 			memory[sPt-2] = memory[addr+2]
@@ -825,7 +825,7 @@ var OpCodes = [0xff]OpCode{
 		Op:      0x48,
 		ArgSize: 64,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			addr := Btoi64(memory[ePt+1 : ePt+9])
+			addr := Btoi64(code[ePt+1 : ePt+9])
 			memory[sPt-8] = memory[addr]
 			memory[sPt-7] = memory[addr+1]
 			memory[sPt-6] = memory[addr+2]
