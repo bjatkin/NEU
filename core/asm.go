@@ -822,54 +822,50 @@ var OpCodes = [0xff]OpCode{
 		},
 	},
 	{ // Byte push (addr)
-		Pat:     "<.#",
-		Op:      0x45,
-		ArgSize: 64,
+		Pat: "<#.",
+		Op:  0x45,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			addr := *Asi64(&code[ePt+1])
-			memory[sPt-1] = memory[addr]
-			return sPt - 1, ePt + 9
+			addr := *Asi64(&memory[sPt])
+			memory[sPt+7] = memory[addr]
+			return sPt + 7, ePt + 1
 		},
 	},
 	{ // Int16 push (addr)
-		Pat:     "<o#",
-		Op:      0x46,
-		ArgSize: 64,
+		Pat: "<#o",
+		Op:  0x46,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			addr := *Asi64(&code[ePt+1])
-			memory[sPt-2] = memory[addr]
-			memory[sPt-1] = memory[addr+1]
-			return sPt - 2, ePt + 9
+			addr := *Asi64(&memory[sPt])
+			memory[sPt+6] = memory[addr]
+			memory[sPt+7] = memory[addr+1]
+			return sPt + 6, ePt + 1
 		},
 	},
 	{ // Int32 push (addr)
-		Pat:     "<O#",
-		Op:      0x47,
-		ArgSize: 64,
+		Pat: "<#O",
+		Op:  0x47,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			addr := *Asi64(&code[ePt+1])
-			memory[sPt-4] = memory[addr]
-			memory[sPt-3] = memory[addr+1]
-			memory[sPt-2] = memory[addr+2]
-			memory[sPt-1] = memory[addr+3]
-			return sPt - 4, ePt + 9
+			addr := *Asi64(&memory[sPt])
+			memory[sPt+4] = memory[addr]
+			memory[sPt+5] = memory[addr+1]
+			memory[sPt+6] = memory[addr+2]
+			memory[sPt+7] = memory[addr+3]
+			return sPt + 4, ePt + 1
 		},
 	},
 	{ // Int64 push (addr)
-		Pat:     "<#",
-		Op:      0x48,
-		ArgSize: 64,
+		Pat: "<#",
+		Op:  0x48,
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
-			addr := *Asi64(&code[ePt+1])
-			memory[sPt-8] = memory[addr]
-			memory[sPt-7] = memory[addr+1]
-			memory[sPt-6] = memory[addr+2]
-			memory[sPt-5] = memory[addr+3]
-			memory[sPt-4] = memory[addr+4]
-			memory[sPt-3] = memory[addr+5]
-			memory[sPt-2] = memory[addr+6]
-			memory[sPt-1] = memory[addr+7]
-			return sPt - 8, ePt + 9
+			addr := *Asi64(&memory[sPt])
+			memory[sPt] = memory[addr]
+			memory[sPt+1] = memory[addr+1]
+			memory[sPt+2] = memory[addr+2]
+			memory[sPt+3] = memory[addr+3]
+			memory[sPt+4] = memory[addr+4]
+			memory[sPt+5] = memory[addr+5]
+			memory[sPt+6] = memory[addr+6]
+			memory[sPt+7] = memory[addr+7]
+			return sPt, ePt + 1
 		},
 	},
 	{ // Break
@@ -878,6 +874,49 @@ var OpCodes = [0xff]OpCode{
 		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
 			// no-op
 			return sPt, ePt + 1
+		},
+	},
+	{ // Byte Duplicate Stack
+		Pat: "X2.",
+		Op:  0x4a,
+		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt, newEPt uint) {
+			memory[sPt-1] = memory[sPt]
+			return sPt - 1, ePt + 1
+		},
+	},
+	{ // Int16 Duplicate Stack
+		Pat: "X2o",
+		Op:  0x4b,
+		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt uint, newEPt uint) {
+			memory[sPt-2] = memory[sPt]
+			memory[sPt-1] = memory[sPt+1]
+			return sPt - 2, ePt + 1
+		},
+	},
+	{ // Int32 Duplicate Stack
+		Pat: "X2O",
+		Op:  0x4c,
+		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt uint, newEPt uint) {
+			memory[sPt-4] = memory[sPt]
+			memory[sPt-3] = memory[sPt+1]
+			memory[sPt-2] = memory[sPt+2]
+			memory[sPt-1] = memory[sPt+3]
+			return sPt - 4, ePt + 1
+		},
+	},
+	{ // Int64 Duplicate Stack
+		Pat: "X2",
+		Op:  0x4d,
+		Fn: func(memory, code []byte, sPt, ePt uint) (newSPt uint, newEPt uint) {
+			memory[sPt-8] = memory[sPt]
+			memory[sPt-7] = memory[sPt+1]
+			memory[sPt-6] = memory[sPt+2]
+			memory[sPt-5] = memory[sPt+3]
+			memory[sPt-4] = memory[sPt+4]
+			memory[sPt-3] = memory[sPt+5]
+			memory[sPt-2] = memory[sPt+6]
+			memory[sPt-1] = memory[sPt+7]
+			return sPt - 8, ePt + 1
 		},
 	},
 }

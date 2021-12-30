@@ -4,7 +4,7 @@ import "fmt"
 
 // for reference agains hellow_world.nb file
 func main() {
-	plotLineSimple(0, 0, 3, 3)
+	plotLineSimple(1, 0, 2, 3)
 	fmt.Println("-------------")
 	plotLine(10, -3, 11, -6)
 	fmt.Println("-------------")

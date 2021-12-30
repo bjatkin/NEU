@@ -10,7 +10,7 @@ import (
 func main() {
 	game := NewGame()
 
-	code, err := ioutil.ReadFile("example.n")
+	code, err := ioutil.ReadFile("hello_world.n")
 	if err != nil {
 		log.Fatalln(err)
 	}

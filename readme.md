@@ -28,6 +28,10 @@ Labels are converted to explicit memory addresses by the assembler.
 ### number literals
 
 Numerical literals can be either in decimal notation (1, 10, 50), hexidecimal notation (0xff, 0x0a), or binary notation (0b00001100).
+Hex and binary literals must include their respective prefixes to be processed correctly.
+All numbers are considers signed twos compliment nubers with 2 exceptions
+  1) addresses are always considered unsigned 64 bit integers
+  2) bytes are always considered unsigned
 
 ### jump statments
 
@@ -35,7 +39,7 @@ Jump statments come in two flavors, normal jumps or conditional jumps
 Normal jumps will pop the top 8 bytes off the stack and move to that line in the program and then continue execution from that point.
 Conditional jumps will first pop the first 2 bytes (or sets of bytes) off the stack and test them agains each other.
 If the condition returns true it behaves the same as a normal jump.
-If it returns false it pushes the popped values back onto the stack and exxecution continues on to the next instruction.
+If it returns false the jump address is popped off the stack and discarded and execution continues on to the next instruction.
 
 # Op Codes Reference
 
@@ -62,10 +66,10 @@ the [L] indicates an argument which is a label to a location in the code.
 | int16 divide          | /o      | 0x0d | pop the top 4 bytes off the stack, convert them to 2 int16s, divide them, and push the result onto the stack                 |
 | int32 divide          | /O      | 0x0e | pop the top 8 bytes off the stack, convert them to 2 int32s, divide them, and push the result onto the stack                 |
 | int64 divide          | /       | 0x0f | pop the top 16 bytes off the stack, convert them to 2 int64s, divide them, and push the result onto the stack                |
-| byte push             | <. #    | literal(0x10) addr(0x45) | push a new byte onto the stack (# can be an address or a literal)                                        |
-| int16 push            | <o #    | literal(0x11) addr(0x46) | push 2 new bytes onto the stack as an int16 (# can be an address or a literal)                           |
-| int32 push            | <O #    | literal(0x12) addr(0x47) | push 2 new bytes onto the stack as an int32 (# can be an address or a literal)                           |
-| int64 push            | < #     | literal(0x13) addr(0x48) | push 2 new bytes onto the stack as an int64 (# can be an address or a literal)                           |
+| byte push             | <.  #   | 0x10 | push a new byte onto the stack, # must be a literal                                                                          |
+| int16 push            | <o  #   | 0x11 | push 2 new bytes onto the stack as an int16, # must be a literal                                                             |
+| int32 push            | <O  #   | 0x12 | push 4 new bytes onto the stack as an int32, # must be a literal                                                            |
+| int64 push            | <   #   | 0x13 | push 8 new bytes onto the stack as an int64, # must be a literal                                                            |
 | byte pop              | >.      | 0x14 | pop the top 9 byte off the stack and writes the last byte to the memory address in the first 8 bytes                         |
 | int16 pop             | >o      | 0x15 | pop the top 10 byte off the stack and writes the last 2 bytes to the memory address in the first 8 bytes                     |
 | int32 pop             | >O      | 0x16 | pop the top 12 byte off the stack and writes the last 4 bytes to the memory address in the first 8 bytes                     |
@@ -115,10 +119,27 @@ the [L] indicates an argument which is a label to a location in the code.
 | inc int16             | ++o     | 0x42 | pop the top 2 bytes off the stack, convert them to an int16, subtract one and push the result onto the stack                 |
 | inc int32             | ++O     | 0x43 | pop the top 4 bytes off the stack, convert them to an int32, subtract one and push the result onto the stack                 |
 | inc int64             | ++      | 0x44 | pop the top 8 bytes off the stack, convert them to an int64, subtract one and push the result onto the stack                 |
+| byte push             | <#.     | 0x45 | pop the top uint64 off the stack as an address, push the byte at that address onto the stack                                 |
+| int16 push            | <#o     | 0x46 | pop the top uint64 off the stack as an address, push the int16 at that address onto the stack                                |
+| int32 push            | <#O     | 0x47 | pop the top uint64 off the stack as an address, push the int32 at that address onto the stack                                |
+| int64 push            | <#      | 0x48 | pop the top uint64 off the stack as an address, push the int64 at that address onto thte stack                               |
 | break point           | (/)     | 0x49 | break point for debugging                                                                                                    |
+| byte duplicate stack  | X2.     | 0x4a | push the top byte onto the stack again                                                                                       |
+| int16 duplicate stack | X2o     | 0x4b | push the top int16 onto the stack again                                                                                      |
+| int32 duplicate stack | X2O     | 0x4c | push the top int32 onto the stack again                                                                                      |
+| int64 duplicate stack | X2      | 0x4d | push the top int64 onto the stack again                                                                                      |
 | label                 | [L]     | ---- | label marks a section of the code.                                                                                           |
 | name address          | _ = #   | ---- | specifiy a name for a numerical constant that can be used later in your code                                                 |
 | memory address        | #       | ---- | converts a numerical literal into a memory address                                                                           |
+
+# Debugger
+The neu interpreter comes with a debugger built in to make it easier to write your code.
+The breakpoint symbole is `(/)`, and will halt execution of you program and start the debugger.
+To get more information on the debugger simply type `?` or `help` and you will be given a list of debugger commands.
+Remember that your code will run every frame so you code may halt every frame depending on where you put your break point.
+Generally the debugger presents its data as hex numbers but occationally it shows them as decimal numbers as well.
+When this is the case the decimal number is printed first followed by the `|` symbole and then the hex number with an explicit hex prefix `0x`
+For example the `spt` or stack pointer address command will return `[ 100 | 0x00000064 ]`.
 
 # Example Programs
 ### example 1
@@ -140,12 +161,18 @@ Note the poping a value off the stack does not clear the value, it simply moves 
 Thus the final state of the stack after this progam runs is:
 
 ```
-  ------
-  | 10 |
-  ------
-> | 15 |
-  ------
+00000010 | 10 | 
+00000011 | 15 | < stack pointer
 ```
+
+### drawing to the screen
+drawing to the screen is as simple as writing to the correct location in memory. Pixels are 2 bits each and there are 4 pixels packed into each byte
+```
+       pxl1 pxl2 pxl3 pxl4
+byte: [ 00   11   01   10 ]
+```
+
+you can see an example of how to draw to the screen [here](https://github.com/bjatkin/NEU/blob/main/example.nb)
 
 # Development Thoughts
 * Should we use 32 or maybe even 64 bits as the default size for the buffer? There are some challenges that come along with that but some benefits as well.
@@ -165,4 +192,9 @@ Thus the final state of the stack after this progam runs is:
 * first class support for functions? first class support for arrays?
 * we need to improve the compile error messages (they really suck right now)
 * function calls and looping need to have dedicated byte codes, right now they are very verbose
-* should we add simple template type stuff (like php import?)
+* should we add simple template type stuff (like php import directive?)
+* error on lables which are difined multiple times
+* error when a named constant can't be replaced
+* add a frame counter to the debugger so you know when a frame has ticked over
+* addresses should be the last argument pushed onto the stack
+* some sort of bulk mem cpy function would probably be nice
