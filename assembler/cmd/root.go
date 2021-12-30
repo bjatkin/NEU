@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strconv"
 	"strings"
 
@@ -50,7 +49,8 @@ var rootCmd = &cobra.Command{
 		}
 
 		if print {
-			printByteArray(asm)
+			lines := core.FmtByteArray(0, asm)
+			fmt.Printf("\nEXE:\n%s\n\n", strings.Join(lines, "\n"))
 		}
 
 		i := strings.Index(filepath, ".nb")
@@ -209,50 +209,38 @@ func convertNum(num string, size byte) ([]byte, error) {
 		num = strings.TrimPrefix(num, "0x")
 	}
 
-	i, err := strconv.ParseInt(num, base, int(size))
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("unable to convert number '%s' as a base %d number: %s", num, base, err))
+	parseErr := func(err error) error {
+		return errors.New(fmt.Sprintf("unable to convert number '%s' as a base %d and size %d number: %s", num, base, size, err))
 	}
 
 	switch size {
 	case 8:
+		i, err := (strconv.ParseUint(num, base, int(size)))
+		if err != nil {
+			return nil, parseErr(err)
+		}
 		return []byte{byte(i)}, nil
 	case 16:
+		i, err := (strconv.ParseInt(num, base, int(size)))
+		if err != nil {
+			return nil, parseErr(err)
+		}
 		return core.I16tob(int16(i)), nil
 	case 32:
+		i, err := (strconv.ParseInt(num, base, int(size)))
+		if err != nil {
+			return nil, parseErr(err)
+		}
 		return core.I32tob(int32(i)), nil
 	case 64:
+		i, err := (strconv.ParseInt(num, base, int(size)))
+		if err != nil {
+			return nil, parseErr(err)
+		}
 		return core.I64tob(int(i)), nil
 	default:
 		return nil, errors.New(fmt.Sprintf("invalid size %d for converting number", size))
 	}
-}
-
-func printByteArray(asm []byte) {
-	var lines, line []string
-	var memoryOffset int
-	for i, b := range asm {
-		line = append(line, padStr(fmt.Sprintf("%X", b), 2))
-
-		if (i+1)%16 == 0 || i == len(asm)-1 {
-			lines = append(lines, fmt.Sprintf("%s | %s", padStr(fmt.Sprintf("%X", memoryOffset), 8), strings.Join(line, " ")))
-			line = []string{}
-			memoryOffset += 16
-		}
-	}
-	fmt.Printf("\nEXE:\n%s\n\n", strings.Join(lines, "\n"))
-}
-
-func padStr(s string, l int) string {
-	for len(s) < l {
-		s = "0" + s
-	}
-
-	if len(s) > l {
-		log.Fatalf("input value '%s' was longer than specified length %d\n", s, l)
-	}
-
-	return s
 }
 
 func Execute() error {

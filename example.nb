@@ -20,6 +20,7 @@
 [Draw]
   //  check for the loop end
   <   [End]
+  //  (/) // uncoment to test the debugger
   <   #\i
   <   2
   ?<

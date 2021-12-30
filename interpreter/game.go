@@ -28,6 +28,8 @@ func NewGame() *Game {
 		Ref: game.Interpreter.Memory[:1024],
 	}
 
+	game.Interpreter.Debugger = NewDebugger(game.Interpreter)
+
 	return game
 }
 

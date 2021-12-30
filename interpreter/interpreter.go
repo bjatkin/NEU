@@ -16,6 +16,8 @@ type Interp struct {
 	StackPointer   uint
 	ExePointer     uint
 	ReadOnlyOffset uint
+	Break          bool // break after the next step
+	Debugger       *Debugger
 }
 
 func (i *Interp) Run() error {
@@ -29,9 +31,22 @@ func (i *Interp) Run() error {
 			return errors.New(fmt.Sprintf("uknown byte code 0x%x\n", op))
 		}
 
+		if op == 0x49 { // break point
+			i.Break = true
+		}
+
 		i.StackPointer, i.ExePointer = core.OpCodes[op].Fn(i.Memory[:i.ReadOnlyOffset], i.Memory[i.ReadOnlyOffset:], i.StackPointer, i.ExePointer)
 		if int(i.StackPointer) > int(i.ReadOnlyOffset) {
 			return errors.New(fmt.Sprintf("stack size is less than zero sPt: 0x%x, memorySize: 0x%x", i.StackPointer, len(i.Memory)))
+		}
+
+		if i.Break { // break execution and run the debugger
+			i.Break = false
+
+			err := i.Debugger.Run()
+			if err != nil {
+				return err
+			}
 		}
 	}
 

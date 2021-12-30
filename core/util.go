@@ -208,3 +208,17 @@ func ExpectArg(op byte) bool {
 	}
 	return false
 }
+
+func FmtByteArray(memoryOffset uint, data []byte) []string {
+	var lines, line []string
+	for i, b := range data {
+		line = append(line, fmt.Sprintf("%02X", b))
+
+		if (i+1)%16 == 0 || i == len(data)-1 {
+			lines = append(lines, fmt.Sprintf("%s | %s", fmt.Sprintf("%08X", memoryOffset), strings.Join(line, " ")))
+			line = []string{}
+			memoryOffset += 16
+		}
+	}
+	return lines
+}
