@@ -4,3 +4,6 @@ build:
 
 test:
 	go test ./...
+
+bench:
+	go test ./core -run=all -bench=.
