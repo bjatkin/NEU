@@ -10,6 +10,16 @@ const (
 	IntWidth = 8
 )
 
+// NOTE: doing this this way is much faster but opens up some potential security issues
+// for example, you can now grab stuff under the stack by popping the stack down to a single
+// byte and then popping an int64 off the stack, because we're doing things with unsafe
+// pointers there is no bounds checking going on. How big a deal is letting you access the
+// top 7 bytes of the execution portion of memory?
+// the only security flaw I can think of is loading a very short program that is less than 7
+// bytes to take advantage of this to read/ write data into abitrary memory.
+// in practice that seems tricky to do but is still probably worth looking into.
+// perhaps we just load some data between the stack and the code to prevent any funny
+// business?
 func Asi64(pt *byte) *int {
 	return (*int)(unsafe.Pointer(pt))
 }

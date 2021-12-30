@@ -131,14 +131,14 @@ func assemble(code string) ([]byte, error) {
 		}
 	}
 
-	labelMap := map[string]uint{}
+	labelMap := map[string]int{}
 	labelReplace := map[string][]int{}
 	// pass 3: convert the code to binary
 	// fill out the label map, and the label arg index
 	for _, expr := range expressions {
 		cmd := expr[0]
 		if core.IsLabel(cmd) {
-			labelMap[cmd] = uint(len(bin))
+			labelMap[cmd] = len(bin)
 			// labels aren't included in the byte code
 			continue
 		}
@@ -209,7 +209,7 @@ func convertNum(num string, size byte) ([]byte, error) {
 		num = strings.TrimPrefix(num, "0x")
 	}
 
-	i, err := strconv.ParseUint(num, base, int(size))
+	i, err := strconv.ParseInt(num, base, int(size))
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("unable to convert number '%s' as a base %d number: %s", num, base, err))
 	}
@@ -218,11 +218,11 @@ func convertNum(num string, size byte) ([]byte, error) {
 	case 8:
 		return []byte{byte(i)}, nil
 	case 16:
-		return core.I16tob(uint16(i)), nil
+		return core.I16tob(int16(i)), nil
 	case 32:
-		return core.I32tob(uint32(i)), nil
+		return core.I32tob(int32(i)), nil
 	case 64:
-		return core.I64tob(uint(i)), nil
+		return core.I64tob(int(i)), nil
 	default:
 		return nil, errors.New(fmt.Sprintf("invalid size %d for converting number", size))
 	}
