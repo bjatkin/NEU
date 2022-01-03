@@ -17,10 +17,9 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&outputFile, "output", "", "the output file to write the compiled phone to")
+	rootCmd.PersistentFlags().StringVar(&outputFile, "output", "", "the output file to write the compiled .n file to")
 	rootCmd.PersistentFlags().BoolVar(&print, "print", false, "print the binary data to the console")
 
-	// TODO: I need a different setup to get this to work the way I want
 	rootCmd.AddCommand(fmtCmd)
 }
 
@@ -182,7 +181,8 @@ func assemble(code string) ([]byte, error) {
 			return nil, errors.New("undefined label " + label)
 		}
 
-		replace := core.I64tob(labelMap[label])
+		l := labelMap[label]
+		replace := core.I64asb(&l)
 		for _, i := range idxs {
 			bin[i] = replace[0]
 			bin[i+1] = replace[1]
@@ -215,29 +215,38 @@ func convertNum(num string, size byte) ([]byte, error) {
 
 	switch size {
 	case 8:
-		i, err := (strconv.ParseUint(num, base, int(size)))
+		i, err := strconv.ParseUint(num, base, int(size))
 		if err != nil {
 			return nil, parseErr(err)
 		}
 		return []byte{byte(i)}, nil
 	case 16:
-		i, err := (strconv.ParseInt(num, base, int(size)))
+		i, err := strconv.ParseInt(num, base, int(size))
 		if err != nil {
 			return nil, parseErr(err)
 		}
-		return core.I16tob(int16(i)), nil
+
+		i16 := int16(i)
+		b16 := core.I16asb(&i16)
+		return b16[:], nil
 	case 32:
-		i, err := (strconv.ParseInt(num, base, int(size)))
+		i, err := strconv.ParseInt(num, base, int(size))
 		if err != nil {
 			return nil, parseErr(err)
 		}
-		return core.I32tob(int32(i)), nil
+
+		i32 := int32(i)
+		b32 := core.I32asb(&i32)
+		return b32[:], nil
 	case 64:
-		i, err := (strconv.ParseInt(num, base, int(size)))
+		i, err := strconv.ParseInt(num, base, int(size))
 		if err != nil {
 			return nil, parseErr(err)
 		}
-		return core.I64tob(int(i)), nil
+
+		i64 := int(i)
+		b64 := core.I64asb(&i64)
+		return b64[:], nil
 	default:
 		return nil, errors.New(fmt.Sprintf("invalid size %d for converting number", size))
 	}

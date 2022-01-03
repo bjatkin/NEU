@@ -18,9 +18,10 @@ type debugCMD struct {
 }
 
 type Debugger struct {
-	i        *Interp
-	cmds     []debugCMD
-	previous string
+	i          *Interp
+	cmds       []debugCMD
+	previous   string
+	frameCount int
 }
 
 func NewDebugger(interp *Interp) *Debugger {
@@ -133,7 +134,7 @@ func NewDebugger(interp *Interp) *Debugger {
 				description: "print out the stack pointer",
 				usage:       "spt",
 				fn: func(d *Debugger, args []string) bool {
-					fmt.Printf("  [ 0x%08x | %d ]\n", d.i.StackPointer, d.i.StackPointer)
+					fmt.Printf("  [ %d | 0x%08x  ]\n", d.i.StackPointer, d.i.StackPointer)
 					return false
 				},
 			},
@@ -142,7 +143,7 @@ func NewDebugger(interp *Interp) *Debugger {
 				description: "print out the execution pointer",
 				usage:       "ept",
 				fn: func(d *Debugger, args []string) bool {
-					fmt.Printf("  local:  [ 0x%08x | %d ]\n  global: [ 0x%x|%d ]\n",
+					fmt.Printf("  local:  [ %d | 0x%08x ]\n  global: [ %d | 0x%08x ]\n",
 						d.i.ExePointer,
 						d.i.ExePointer,
 						d.i.ExePointer+d.i.ReadOnlyOffset,
@@ -171,7 +172,7 @@ func NewDebugger(interp *Interp) *Debugger {
 					}
 
 					endArg := startArg
-					if len(addrs) < 1 {
+					if len(addrs) > 1 {
 						endArg = addrs[1]
 					}
 					end, err := parseNumeric(endArg)
@@ -202,6 +203,15 @@ func NewDebugger(interp *Interp) *Debugger {
 				},
 			},
 			{
+				cmd:         []string{"f", "frame"},
+				description: "the number of frames executed since the engine started",
+				usage:       "f|frame",
+				fn: func(d *Debugger, s []string) bool {
+					fmt.Println("  ", d.frameCount)
+					return false
+				},
+			},
+			{
 				cmd:         []string{"!"},
 				description: "re-run the last successful command",
 				usage:       "!",
@@ -212,6 +222,11 @@ func NewDebugger(interp *Interp) *Debugger {
 
 func (d *Debugger) Run() error {
 	reader := bufio.NewReader(os.Stdin)
+
+	if int(d.i.ExePointer+d.i.ReadOnlyOffset) >= len(d.i.Memory) {
+		fmt.Printf("execution finished (0x%08x / 0x%08x)\n", d.i.ExePointer+d.i.ReadOnlyOffset, len(d.i.Memory))
+		return nil
+	}
 
 	opIndex := d.i.Memory[d.i.ExePointer+d.i.ReadOnlyOffset]
 	op := core.OpCodes[opIndex]

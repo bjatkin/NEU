@@ -1,6 +1,6 @@
 build:
 	go build -o neuBi ./assembler
-	go build -o neuClient ./interpreter
+	go build -o neuVM ./interpreter
 
 test:
 	go test ./...

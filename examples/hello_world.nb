@@ -1,0 +1,686 @@
+\[]          = 0x000 // the start of the screen buffer (ends at 0x400)
+\Font        = 0x410 // font data (432 bytes)
+\FontLoaded  = 0x6C1 // is font data loaded (1 byte)
+\>Addr1      = 0x6C2 // return address for use by the PrintChar fn (8 bytes)
+\>Addr2      = 0x6CA // return address for use by the PrintCharRow fn (8 bytes)
+\[]Addr      = 0x6D2 // location on the screen to draw at (8 bytes)
+\RowOffset   = 0x6DA // row counter for drawing chars (8 bytes)
+\CharIndex   = 0x6E2 // char index for drawing chars (8 bytes)
+\XOffset     = 0x6EA // x offset on the screen (8 bytes)
+\YOffset     = 0x6F2 // y offset on the screen (8 bytes)
+\>Addr0      = 0x6FA // return address for use by the PrintString fn (8 bytes)
+\StringI     = 0x702 // counter for the PrintString fn (1 byte)
+\StringLen   = 0x70A // length of the string to print (1 byte)
+\StringStart = 0x712 // the begining of the straing to be printed (StringLen bytes)
+\StringX     = 0x800 // begining X coord for the string
+\StringY     = 0x810 // begining Y coord for the string
+
+// Font Data
+\A1 = 0x0c3003c000000000
+\A2 = 0x0c300c300ff00c30
+\B1 = 0x0c3003f000000000
+\B2 = 0x03f00c300c3003f0
+\C1 = 0x00300fc000000000
+\C2 = 0x0fc0003000300030
+\D1 = 0x0c3003f000000000
+\D2 = 0x03f00c300c300c30
+\E1 = 0x00300ff000000000
+\E2 = 0x0ff00030003003f0
+\F1 = 0x00300ff000000000
+\F2 = 0x00300030003003f0
+\G1 = 0x00300fc000000000
+\G2 = 0x03c00c300c300f30
+\H1 = 0x0c300c3000000000
+\H2 = 0x0c300c300c300ff0
+\I1 = 0x03c00ff000000000
+\I2 = 0x0ff003c003c003c0
+\J1 = 0x03000fc000000000
+\J2 = 0x03f0033003000300
+\K1 = 0x0c30003000000000
+\K2 = 0x0c300c300c3003f0
+\L1 = 0x0030003000000000
+\L2 = 0x0ff0003000300030
+\M1 = 0x3cf0303000000000
+\M2 = 0x3030303030303330
+\N1 = 0x0cf00c3000000000
+\N2 = 0x0c300c300c300f30
+\O1 = 0x0c3003c000000000
+\O2 = 0x03c00c300c300c30
+\P1 = 0x0c3003f000000000
+\P2 = 0x0030003003f00c30
+\Q1 = 0x0c300c3003c00000
+\Q2 = 0x0cc003300c300c30
+\R1 = 0x0c3003f000000000
+\R2 = 0x0c300c3003f00c30
+\S1 = 0x00300fc000000000
+\S2 = 0x03f00c000c0003c0
+\T1 = 0x03c00ff000000000
+\T2 = 0x03c003c003c003c0
+\U1 = 0x0c300c3000000000
+\U2 = 0x03c00c300c300c30
+\V1 = 0x0c0c0c0c00000000
+\V2 = 0x00c003300c0c0c0c
+\W1 = 0x3030303000000000
+\W2 = 0x30303cf033303030
+\X1 = 0x0c300c3000000000
+\X2 = 0x0c300c300c3003c0
+\Y1 = 0x0c0c0c0c00000000
+\Y2 = 0x00c000c000c00330
+\Z1 = 0x0c000ff000000000
+\Z2 = 0x0ff0003000c00300
+\!1 = 0x03c00f000f000000
+\!2 = 0x00f0000000c003c0
+\_  = 0x0
+
+<   [LoadFontDone]
+<   \FontLoaded
+<#.
+<0.
+?<. // only load the font in once
+
+// load font into memory data (only do this once)
+[LoadFont]
+  <   \A1
+  <   \Font
+  >
+  
+  <   \A2
+  <   \Font
+  <   8
+  +
+  >
+  
+  <   \B1
+  <   \Font
+  <   16
+  +
+  >
+  
+  <   \B2
+  <   \Font
+  <   24
+  +
+  >
+  
+  <   \C1
+  <   \Font
+  <   32
+  +
+  >
+  
+  <   \C2
+  <   \Font
+  <   40
+  +
+  >
+  
+  <   \D1
+  <   \Font
+  <   48
+  +
+  >
+  
+  <   \D2
+  <   \Font
+  <   56
+  +
+  >
+  
+  <   \E1
+  <   \Font
+  <   64
+  +
+  >
+  
+  <   \E2
+  <   \Font
+  <   72
+  +
+  >
+  
+  <   \F1
+  <   \Font
+  <   80
+  +
+  >
+  
+  <   \F2
+  <   \Font
+  <   88
+  +
+  >
+  
+  <   \G1
+  <   \Font
+  <   96
+  +
+  >
+  
+  <   \G2
+  <   \Font
+  <   104
+  +
+  >
+  
+  <   \H1
+  <   \Font
+  <   112
+  +
+  >
+  
+  <   \H2
+  <   \Font
+  <   120
+  +
+  >
+  
+  <   \I1
+  <   \Font
+  <   128
+  +
+  >
+  
+  <   \I2
+  <   \Font
+  <   136
+  +
+  >
+  
+  <   \J1
+  <   \Font
+  <   144
+  +
+  >
+  
+  <   \J2
+  <   \Font
+  <   152
+  +
+  >
+  
+  <   \K1
+  <   \Font
+  <   160
+  +
+  >
+  
+  <   \K2
+  <   \Font
+  <   168
+  +
+  >
+  
+  <   \L1
+  <   \Font
+  <   176
+  +
+  >
+  
+  <   \L2
+  <   \Font
+  <   184
+  +
+  >
+  
+  <   \M1
+  <   \Font
+  <   192
+  +
+  >
+  
+  <   \M2
+  <   \Font
+  <   200
+  +
+  >
+  
+  <   \N1
+  <   \Font
+  <   208
+  +
+  >
+  
+  <   \N2
+  <   \Font
+  <   216
+  +
+  >
+  
+  <   \O1
+  <   \Font
+  <   224
+  +
+  >
+  
+  <   \O2
+  <   \Font
+  <   232
+  +
+  >
+  
+  <   \P1
+  <   \Font
+  <   240
+  +
+  >
+  
+  <   \P2
+  <   \Font
+  <   248
+  +
+  >
+  
+  <   \Q1
+  <   \Font
+  <   256
+  +
+  >
+  
+  <   \Q2
+  <   \Font
+  <   264
+  +
+  >
+  
+  <   \R1
+  <   \Font
+  <   272
+  +
+  >
+  
+  <   \R2
+  <   \Font
+  <   280
+  +
+  >
+  
+  <   \S1
+  <   \Font
+  <   288
+  +
+  >
+  
+  <   \S2
+  <   \Font
+  <   296
+  +
+  >
+  
+  <   \T1
+  <   \Font
+  <   304
+  +
+  >
+  
+  <   \T2
+  <   \Font
+  <   312
+  +
+  >
+  
+  <   \U1
+  <   \Font
+  <   320
+  +
+  >
+  
+  <   \U2
+  <   \Font
+  <   328
+  +
+  >
+  
+  <   \V1
+  <   \Font
+  <   336
+  +
+  >
+  
+  <   \V2
+  <   \Font
+  <   344
+  +
+  >
+  
+  <   \W1
+  <   \Font
+  <   352
+  +
+  >
+  
+  <   \W2
+  <   \Font
+  <   360
+  +
+  >
+  
+  <   \X1
+  <   \Font
+  <   368
+  +
+  >
+  
+  <   \X2
+  <   \Font
+  <   376
+  +
+  >
+  
+  <   \Y1
+  <   \Font
+  <   384
+  +
+  >
+  
+  <   \Y2
+  <   \Font
+  <   392
+  +
+  >
+  
+  <   \Z1
+  <   \Font
+  <   400
+  +
+  >
+  
+  <   \Z2
+  <   \Font
+  <   408
+  +
+  >
+  
+  <   \!1
+  <   \Font
+  <   416
+  +
+  >
+  
+  <   \!2
+  <   \Font
+  <   424
+  +
+  >
+  
+  <   \_
+  <   \Font
+  <   432
+  +
+  >
+  
+  <   \_
+  <   \Font
+  <   440
+  +
+  >
+  
+  <.   1
+  <   \FontLoaded
+  >.
+
+[LoadFontDone]
+
+//  set up the string 'HELLO'
+<.  6
+<   \StringLen
+>.
+
+//  H
+<.  7
+<   \StringStart
+>.
+
+//  E
+<.  4
+<   \StringStart
+<   1
++
+>.
+
+//  L
+<.  11
+<   \StringStart
+<   2
++
+>.
+
+//  L
+<.  11
+<   \StringStart
+<   3
++
+>.
+
+//  O
+<.  14
+<   \StringStart
+<   4
++
+>.
+
+//  _
+<.  27
+<   \StringStart
+<   5
++
+>.
+
+//  Call Print String
+<   0
+<   0
+<   [PrintWorld]
+<   [PrintString]
+|>
+
+[PrintWorld]
+//  set up the string 'WORLD!'
+<.  6
+<   \StringLen
+>.
+
+//  W
+<.  22
+<   \StringStart
+>.
+
+//  O
+<.  14
+<   \StringStart
+<   1
++
+>.
+
+//  R
+<.  17
+<   \StringStart
+<   2
++
+>.
+
+//  L
+<.  11
+<   \StringStart
+<   3
++
+>.
+
+//  D
+<.  3
+<   \StringStart
+<   4
++
+>.
+
+//  !
+<.  26
+<   \StringStart
+<   5
++
+>.
+
+//  Call Print String
+<   10
+<   0
+<   [Fin]
+<   [PrintString]
+|>
+
+// PrintString prints out a full string
+// Stack:
+//   string y location (in pixels)
+//   string x location (in bytes)
+//   return address
+[PrintString]
+  <    \>Addr0
+  >
+
+  <    \StringX
+  >
+
+  <    \StringY
+  >
+
+  <0.
+  <    \StringI
+  >.
+
+  [PrintStringLoop]
+    <0.
+    <0o
+    <0O  // convert string start index to an int64
+    <0.
+    <0o
+    <0O  // convert StringI to an int64
+    <    \StringI
+    <#.
+    <    \StringStart
+    + 
+    <#.
+    <    \StringY
+    <#
+    <    \StringX
+    <#
+    <    [PrintStringLoopCheck]
+    <    [PrintChar]
+    |>
+
+    [PrintStringLoopCheck]
+    <   \StringX
+    <#
+    <   2
+    +
+    <   \StringX
+    >
+
+    <   \StringI
+    <#.
+    ++.
+    <   \StringI
+    >.
+
+    <   \>Addr0
+    <#
+    <   \StringI
+    <#.
+    <   \StringLen
+    <#.
+    --
+    ?<.
+  
+    <   [PrintStringLoop]
+    |>
+
+// PrintChar prints a full char to the screen
+// Stack:
+//   char index
+//   y offset (in pixels)
+//   x offset (in bytes)
+//   return address
+[PrintChar]
+  <   \>Addr1
+  >
+
+  <   \XOffset
+  >
+
+  <   \YOffset
+  >
+
+  <   \CharIndex
+  >
+
+  [LoopPrintChar]
+    <  \RowOffset
+    <#
+    <  \CharIndex
+    <#
+    <   \XOffset
+    <#
+    <   \YOffset
+    <#
+    <   [PrintCharRowDone]
+    <   [PrintCharRow]
+    |>
+    [PrintCharRowDone]
+
+    <   \YOffset
+    <#
+    ++
+    <   \YOffset
+    >
+  
+    <   [LoopPrintChar] // prep for the jump later on
+    <   \RowOffset
+    <#
+    <   2
+    +
+    <   \RowOffset
+    >
+  
+    <   \RowOffset
+    <#
+    <   16
+    ?>
+  
+  <0
+  <   \RowOffset
+  >
+  
+  <   \>Addr1
+  <#
+  |>
+
+// PrintCharRow prints a single row froma char onto the screen
+// Stack:
+//   char row offset 
+//   char index
+//   screen x offset (bytes)
+//   screen y offset (pixels)
+//   return addr
+[PrintCharRow]
+  <   \>Addr2
+  >   // save the return address for later
+
+  <   16
+  * 
+  +   // screen offset
+  <   \[]Addr
+  >   // save the screen address
+
+  <   16
+  *   // offset of the first byte of the char
+  +   // row offset for the char
+  <   \Font
+  +
+  <#o
+
+  <   \[]Addr
+  <#  // load the screen address
+
+  >o  // write the bytes to the screen
+
+  <   \>Addr2
+  <#
+  |>
+
+[Fin]
