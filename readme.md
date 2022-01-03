@@ -1,7 +1,8 @@
 # Working With This Code
 
 ### building
-Building this code is as simple running `make build`.
+You'll need to install [ebiten](https://ebiten.org/documents/install.html) in order to get this code to build.
+Once you installed that building this code is as simple running `make build`.
 This will build both `neuBi` which is the new byte code assembler, as well as neuVM which is the neu byte code interpreter
 
 ### testing
