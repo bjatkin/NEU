@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	maxByteCodeLen = 4096
+	maxByteCodeLen = 20 * 1024 // 20k is the max size of your code (leaves 12k of execution memory)
 )
 
 type Interp struct {
-	Memory         [8 * 1024]byte // main memory
+	Memory         [32 * 1024]byte // 32k of main memory
 	StackPointer   uint
 	ExePointer     uint
 	ReadOnlyOffset uint

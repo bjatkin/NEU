@@ -17,10 +17,9 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&outputFile, "output", "", "the output file to write the compiled phone to")
+	rootCmd.PersistentFlags().StringVar(&outputFile, "output", "", "the output file to write the compiled .n file to")
 	rootCmd.PersistentFlags().BoolVar(&print, "print", false, "print the binary data to the console")
 
-	// TODO: I need a different setup to get this to work the way I want
 	rootCmd.AddCommand(fmtCmd)
 }
 

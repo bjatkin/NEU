@@ -1,14 +1,42 @@
-# Neu ASM
+# Working With This Code
 
-When neu code is assembled it is placed in a .n file.
-This file can be run by the neu interpreter vm.
+### building
+Building this code is as simple running `make build`.
+This will build both `neuBi` which is the new byte code assembler, as well as neuVM which is the neu byte code interpreter
 
-# Neu Bytecode
+### testing
+Testing this code is as simple as running `make test`.
+This will run all the test files in this repo
 
-Neu is a stackbased bytecode that runs on a small vm.
-It uses a single stack and 1 byte opcodes.
-Neu byte code is be stored in .nb files
+### benchmarks
+Benchmarking the code can be done by running `make bench`.
+Currently, the only benchmarks are in [core/util_bench_test.go](https://github.com/bjatkin/NEU/blob/main/core/util_bench_test.go).
+These benchmarks were written to look at the performance differences between I64tob and I64asb (and similar methods for the other int types).
+Looking at these benchmarks you can see the huge performance gain we get by using unsafe pointers to convert from byte slices into integers and vice versa.
 
+# Neu Assembler
+
+The neu text code assembler is called neuBi (pronounced newbie).
+You can build neuBi by running `make build`.
+Once you have neuBi built you can run `./neuBi -h` to get more info about how it works.
+The most common way to use neuBi is to assemble .nb files.
+Simply run `./neuBi my_file.nb` to assemble `my_file.nb` into `my_file.n`.
+
+# Neu Bytecode and Neu Text Code
+
+Neu is a stackbased bytecode that runs on a small vm which uses a single stack and 1 byte opcodes.
+Neu text code is the textual representation of neu byte code.
+Neu text code was designed to be human readable and can be assembled into neu byte code by [neuBi](#neu-assembler)
+Neu text code is stored in .nb files.
+Neu byte code is stored in .n files in a formt which can be run by the neuVM.
+
+# Neu VM
+
+Neu VM is the virtual machine that runs neu byte code.
+You can build the neuVM by running `make build`.
+Once the new VM is built you can run `neuVM my_file.n` to run your compiled neu byte code.
+
+# Writing Neu Text Code
 ### comments
   
 Comments in neu are specified by two forward slashes //.
@@ -172,29 +200,16 @@ drawing to the screen is as simple as writing to the correct location in memory.
 byte: [ 00   11   01   10 ]
 ```
 
-you can see an example of how to draw to the screen [here](https://github.com/bjatkin/NEU/blob/main/example.nb)
+You can see an example of how to draw to the screen [here](https://github.com/bjatkin/NEU/blob/main/examples/draw.nb)
 
-# Development Thoughts
-* Should we use 32 or maybe even 64 bits as the default size for the buffer? There are some challenges that come along with that but some benefits as well.
-  - real programs will be working with 32/ 64 bit numbers much more often than small 8 or 16 bit numbers.
-  - wastes space and given these need to be sent over the network that's important (although it does so in a way that may be simple to compress?).
-  - how do we get smaller values (like byte or int16) to work correctly/ overflow in the right way?
-  - we are gonna waste cpu cycles combining bytes into int64 or int32's all the time.
-  - what's the point of having a 1 bit op code if it has to be stuck into a 32 bit int anyway?
-
-* fmt nb code to have consistent spacing (neu fmt?)
-* [long term] does this stack base setup allow for SIMD? should I change the bytecode setup to make SIMD easier to achieve?
-* add a magic string as a header?
-* add a version for future proofness?
-* seems like I'm working at the resolution of my pointers a lot so 64 bits
-* web asm and java byte code both have the concept of 'locals' should I adopt something like this?
-* should their be support for floats? signed ints?
-* first class support for functions? first class support for arrays?
-* we need to improve the compile error messages (they really suck right now)
-* function calls and looping need to have dedicated byte codes, right now they are very verbose
-* should we add simple template type stuff (like php import directive?)
-* error on lables which are difined multiple times
-* error when a named constant can't be replaced
-* add a frame counter to the debugger so you know when a frame has ticked over
-* addresses should be the last argument pushed onto the stack
-* some sort of bulk mem cpy function would probably be nice
+### hello world
+Neu byte code is very low level and bare bones.
+This mean writing a hello world example is not as simple as it might be in a higher level language like python or even c.
+You can see an example of a hello world program [here](https://github.com/bjatkin/NEU/blob/main/examples/hello_world.n).
+This program starts by loading a custom font into memory.
+Once this is done the code uses 3 "functions" to write the text 'HELLO WORLD!' to the screen.
+While these are not true functions in the strict sense of the word the work in a somewhat similar manner so I use the terminology moving forward.
+The first is a function to draw strings to the screen.
+The second is a function that draws individual characters to the screen which the PrintString function calls on a loop.
+The final function draws a row of pixels from a character, this is called in a loop from the PrintChar function.
+Together these 3 functions write the text to the screen.
