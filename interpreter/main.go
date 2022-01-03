@@ -3,14 +3,18 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func main() {
 	game := NewGame()
+	if len(os.Args) != 2 {
+		log.Fatalln("incorect args, need a .n file to run")
+	}
 
-	code, err := ioutil.ReadFile("hello_world.n")
+	code, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
 		log.Fatalln(err)
 	}

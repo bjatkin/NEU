@@ -1,5 +1,5 @@
 \[] = 0x000 // the start of the screen buffer (goes to 0x400)
-\i  = 0x410 // itter for looping (4 bytes)
+\i  = 0x410 // itter for looping (8 bytes)
 
 // for drawing pixels (these can be ored together)
 \[3---] = 0b11000000
@@ -21,7 +21,8 @@
   //  check for the loop end
   <   [End]
   //  (/) // uncoment to test the debugger
-  <   #\i
+  <   \i
+  <#
   <   2
   ?<
 
@@ -35,7 +36,9 @@
   <   \[]
   <   16
   <   30
-  <   #\i
+  <   \i
+  <#
+  
   +   // 30 + i
   *   // col count times width
   <   7
@@ -44,7 +47,8 @@
   >.
 
   // update i
-  <   #\i
+  <   \i
+  <#
   ++
   <   \i
   >
