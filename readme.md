@@ -35,6 +35,39 @@ Neu byte code is stored in .n files in a formt which can be run by the neuVM.
 Neu VM is the virtual machine that runs neu byte code.
 You can build the neuVM by running `make build`.
 Once the new VM is built you can run `neuVM my_file.n` to run your compiled neu byte code.
+You code will be run by the interpreter 60 times per second and the screen will be updated based on the results of your code.
+
+### memory layout
+
+![memory layout](/assets/memory_layout-large.png)
+
+When the neuVM starts is allocates a 32k block of memory.
+This is all the memory your program is allowed to use.
+The first thing that happens when the VM is started is your code is loaded into this 32k block of memory.
+The maximum allowed size for you code is 20k. 
+This code is loaded into high memory and will always take up the higest memory address in your code.
+The neuVM loads this code in such that no empty addresses remain at the end of the memory block.
+This secion of code is marked as read only and can not be written to.
+Attempting to write to this region of memory will result in a runtime error.
+
+Once your code has been loaded the neuVM sets up you programs stack.
+The stack starts at the address where memory changes from read write, to read only.
+This stack pointer then moves from high memory to low memory as you push items onto the stack.
+This means you could theorectially write directly to the stack using pop operations.
+However, this is discourged as pushing and popping from the stack is the default way to perform operations in neu byte code.
+
+Once your code is running you are allowed to write or read from any memory address that is not marked as read only.
+
+### the screen
+
+The primary way of showing data to the user is by writing to the screen.
+The screen is a 64x64 4 color screen which uses the [crimson pallet](https://lospec.com/palette-list/crimson) from lospec.
+This screen is set up to watch the first 1024 bytes in memory (0x00 - 0x400).
+This region of memory will be read at the end of each frame and updated.
+Writing data to this region of the memory is the only way to draw onto the screen.
+The screen uses 2 bit color so each pixel takes up 2 bits in memory.
+This means the screen is 16 bytes wide (16 bytes * 4 2 bit pixels = 64 pixels)
+The refresh rate of the screen is 60 times per second (though this may drop if running the byet code becomes too expensive).
 
 # Writing Neu Text Code
 ### comments
@@ -45,7 +78,8 @@ Anything that comes after these 2 symboles on a line will be ignored by the asse
 ### pointers/ memory addresses
 
 Memory addresses can be in either hexidecimal notation (#0x5a, #0x7b) or binary notation (#0b00001110).
-Pointers are 64 bits numbers.
+Pointers are 64 bit unsigned integers.
+To learn more about about the layout of memory in the neuVM see the section Neu VM about [memory layout](#memory-layout).
 
 ### labels
 
@@ -203,13 +237,31 @@ byte: [ 00   11   01   10 ]
 You can see an example of how to draw to the screen [here](https://github.com/bjatkin/NEU/blob/main/examples/draw.nb)
 
 ### hello world
+
 Neu byte code is very low level and bare bones.
 This mean writing a hello world example is not as simple as it might be in a higher level language like python or even c.
 You can see an example of a hello world program [here](https://github.com/bjatkin/NEU/blob/main/examples/hello_world.n).
 This program starts by loading a custom font into memory.
+![font reference](/assets/hello_font-large.png)
+
+
 Once this is done the code uses 3 "functions" to write the text 'HELLO WORLD!' to the screen.
 While these are not true functions in the strict sense of the word the work in a somewhat similar manner so I use the terminology moving forward.
 The first is a function to draw strings to the screen.
 The second is a function that draws individual characters to the screen which the PrintString function calls on a loop.
 The final function draws a row of pixels from a character, this is called in a loop from the PrintChar function.
 Together these 3 functions write the text to the screen.
+
+# Future Goals
+
+I've put this code away for now but there are a few features I plan to add if I get the change to return to it.
+* a frame counter in memory so there can be frame based logic in the code
+* memory addresses for getting keyboard input kind of like the screen.
+    The VM would update the specified memory addresses to indicate what buttons were pressed on a given frame so code could recieve some outside input.
+* memory addresses for getting mouse input.
+    This would work the same as the keyboard input but would be for the mouse instead.
+* allowing code to define it's own pallet when it's loaded into the VM (maybe even allow it to be changed at runtime).
+* some byte codes for working with arrays
+
+If you are interested in writing any of these features yourself feel free to open a PR with the new feature.
+Email me at opensource.atkin@gmail.com for a review and merge.
